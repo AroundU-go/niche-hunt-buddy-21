@@ -1,4 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
+import { auth, clerkClient } from "@clerk/tanstack-react-start/server";
+import { supabase } from "./supabase";
 
 export type Lead = {
   placeId: string;
@@ -56,6 +58,30 @@ export const searchLeads = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const token = process.env.APIFY_TOKEN;
     if (!token) throw new Error("APIFY_TOKEN not configured");
+
+    // --- Clerk: get authenticated user ---
+    let userId: string | null = null;
+    try {
+      const authObj = await auth();
+      userId = authObj.userId;
+      if (userId) {
+        const user = await clerkClient.users.getUser(userId);
+        const email = user.emailAddresses?.[0]?.emailAddress ?? "";
+        // Upsert profile in Supabase
+        await supabase.from("profiles").upsert(
+          {
+            id: userId,
+            email,
+            first_name: user.firstName ?? null,
+            last_name: user.lastName ?? null,
+            last_login: new Date().toISOString(),
+          },
+          { onConflict: "id" }
+        );
+      }
+    } catch (_) {
+      // Auth is optional for the search itself; continue gracefully
+    }
 
     const input = {
       enableCompetitorAnalysis: false,
@@ -136,5 +162,51 @@ export const searchLeads = createServerFn({ method: "POST" })
     // Sort by lead score desc
     leads.sort((a, b) => b.leadScore - a.leadScore);
 
+    // --- Log search to Supabase ---
+    if (userId) {
+      await supabase.from("searches").insert({
+        user_id: userId,
+        city: data.city,
+        niche: data.niche,
+        results: leads,
+      }).then(({ error }) => {
+        if (error) console.error("Supabase insert error:", error.message);
+      });
+    }
+
     return { leads, searchedAt: new Date().toISOString(), city: data.city, niche: data.niche };
+  });
+
+/* ────────────────────────────
+ *  GET SEARCH HISTORY
+ * ──────────────────────────── */
+
+export type SearchHistoryItem = {
+  id: string;
+  city: string;
+  niche: string;
+  results: Lead[];
+  created_at: string;
+};
+
+export const getSearchHistory = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const { userId } = await auth();
+    if (!userId) {
+      return { history: [] as SearchHistoryItem[] };
+    }
+
+    const { data, error } = await supabase
+      .from("searches")
+      .select("id, city, niche, results, created_at")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    if (error) {
+      console.error("Supabase history fetch error:", error.message);
+      return { history: [] as SearchHistoryItem[] };
+    }
+
+    return { history: (data ?? []) as SearchHistoryItem[] };
   });

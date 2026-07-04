@@ -1,5 +1,5 @@
 import { createFileRoute, redirect, Link } from "@tanstack/react-router";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { auth } from "@clerk/tanstack-react-start/server";
@@ -15,8 +15,10 @@ import {
   TrendingUp,
   Search,
   Building2,
+  History,
+  Clock,
 } from "lucide-react";
-import { searchLeads, type Lead } from "@/lib/leads.functions";
+import { searchLeads, getSearchHistory, type Lead, type SearchHistoryItem } from "@/lib/leads.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -149,6 +151,16 @@ function DashboardSearch() {
   const [meta, setMeta] = useState<{ city: string; niche: string } | null>(null);
 
   const runSearch = useServerFn(searchLeads);
+  const runGetHistory = useServerFn(getSearchHistory);
+  const queryClient = useQueryClient();
+
+  // Fetch search history
+  const historyQuery = useQuery({
+    queryKey: ["searchHistory"],
+    queryFn: () => runGetHistory(),
+  });
+
+  const historyItems: SearchHistoryItem[] = historyQuery.data?.history ?? [];
 
   const mutation = useMutation({
     mutationFn: async (vars: { city: string; niche: string }) =>
@@ -156,6 +168,8 @@ function DashboardSearch() {
     onSuccess: (data) => {
       setResults(data.leads);
       setMeta({ city: data.city, niche: data.niche });
+      // Invalidate history so new search appears
+      queryClient.invalidateQueries({ queryKey: ["searchHistory"] });
       if (data.leads.length === 0) {
         toast.info("No leads found. Try a broader city or different niche.");
       } else {
@@ -166,6 +180,14 @@ function DashboardSearch() {
       toast.error(err.message || "Search failed");
     },
   });
+
+  const restoreHistory = (item: SearchHistoryItem) => {
+    setResults(item.results);
+    setMeta({ city: item.city, niche: item.niche });
+    setCity(item.city);
+    setNiche(item.niche);
+    toast.success(`Restored results for ${item.niche} in ${item.city}`);
+  };
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -184,103 +206,156 @@ function DashboardSearch() {
       : "—";
 
   return (
-    <div>
-      {/* Search */}
-      <Card className="mb-6 border-border/60 bg-card p-5" style={{ boxShadow: "var(--shadow-card)" }}>
-        <div className="mb-3 flex items-center gap-2">
-          <Search className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            New hunt
-          </h3>
-        </div>
-        <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-[1fr_1fr_auto]">
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">City</label>
-            <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder="Austin, USA"
-                className="pl-9"
-                disabled={mutation.isPending}
-              />
-            </div>
-          </div>
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
-              Business niche
-            </label>
-            <div className="relative">
-              <Building2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={niche}
-                onChange={(e) => setNiche(e.target.value)}
-                placeholder="barber shop, plumber, dentist…"
-                className="pl-9"
-                disabled={mutation.isPending}
-              />
-            </div>
-          </div>
-          <div className="flex items-end">
-            <Button
-              type="submit"
-              disabled={mutation.isPending}
-              className="w-full font-semibold md:w-auto"
-              style={{ background: "var(--gradient-hunt)", color: "var(--primary-foreground)" }}
-            >
-              {mutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Hunting…
-                </>
-              ) : (
-                <>
-                  <Crosshair className="mr-2 h-4 w-4" />
-                  Start hunt
-                </>
-              )}
-            </Button>
-          </div>
-        </form>
-        {mutation.isPending && (
-          <p className="mt-3 text-xs text-muted-foreground">
-            Scanning Google Maps for {niche} in {city} without a website. This may take 30–90 seconds.
-          </p>
-        )}
-      </Card>
-
-      {/* Stats */}
-      {results.length > 0 && (
-        <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
-          <StatCard label="Total leads" value={String(results.length)} icon={Target} />
-          <StatCard label="Hot leads" value={String(hotCount)} icon={TrendingUp} accent />
-          <StatCard label="With phone" value={String(withPhone)} icon={Phone} />
-          <StatCard label="Avg rating" value={avgRating} icon={Star} />
-        </div>
-      )}
-
-      {/* Results */}
-      {results.length > 0 ? (
-        <div>
-          <div className="mb-4 flex items-baseline justify-between">
-            <h3 className="text-lg font-semibold">
-              Leads for <span className="text-primary">{meta?.niche}</span> in{" "}
-              <span className="text-primary">{meta?.city}</span>
+    <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+      {/* Main column */}
+      <div>
+        {/* Search */}
+        <Card className="mb-6 border-border/60 bg-card p-5" style={{ boxShadow: "var(--shadow-card)" }}>
+          <div className="mb-3 flex items-center gap-2">
+            <Search className="h-4 w-4 text-primary" />
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+              New hunt
             </h3>
-            <p className="text-xs text-muted-foreground">Sorted by lead score</p>
           </div>
-          <div className="grid gap-4">
-            {results.map((lead) => (
-              <LeadCard key={lead.placeId} lead={lead} />
-            ))}
+          <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-[1fr_1fr_auto]">
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">City</label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="Austin, USA"
+                  className="pl-9"
+                  disabled={mutation.isPending}
+                />
+              </div>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                Business niche
+              </label>
+              <div className="relative">
+                <Building2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={niche}
+                  onChange={(e) => setNiche(e.target.value)}
+                  placeholder="barber shop, plumber, dentist…"
+                  className="pl-9"
+                  disabled={mutation.isPending}
+                />
+              </div>
+            </div>
+            <div className="flex items-end">
+              <Button
+                type="submit"
+                disabled={mutation.isPending}
+                className="w-full font-semibold md:w-auto"
+                style={{ background: "var(--gradient-hunt)", color: "var(--primary-foreground)" }}
+              >
+                {mutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Hunting…
+                  </>
+                ) : (
+                  <>
+                    <Crosshair className="mr-2 h-4 w-4" />
+                    Start hunt
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+          {mutation.isPending && (
+            <p className="mt-3 text-xs text-muted-foreground">
+              Scanning Google Maps for {niche} in {city} without a website. This may take 30–90 seconds.
+            </p>
+          )}
+        </Card>
+
+        {/* Stats */}
+        {results.length > 0 && (
+          <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+            <StatCard label="Total leads" value={String(results.length)} icon={Target} />
+            <StatCard label="Hot leads" value={String(hotCount)} icon={TrendingUp} accent />
+            <StatCard label="With phone" value={String(withPhone)} icon={Phone} />
+            <StatCard label="Avg rating" value={avgRating} icon={Star} />
           </div>
-        </div>
-      ) : !mutation.isPending ? (
-        <EmptyState />
-      ) : (
-        <LoadingSkeleton />
-      )}
+        )}
+
+        {/* Results */}
+        {results.length > 0 ? (
+          <div>
+            <div className="mb-4 flex items-baseline justify-between">
+              <h3 className="text-lg font-semibold">
+                Leads for <span className="text-primary">{meta?.niche}</span> in{" "}
+                <span className="text-primary">{meta?.city}</span>
+              </h3>
+              <p className="text-xs text-muted-foreground">Sorted by lead score</p>
+            </div>
+            <div className="grid gap-4">
+              {results.map((lead) => (
+                <LeadCard key={lead.placeId} lead={lead} />
+              ))}
+            </div>
+          </div>
+        ) : !mutation.isPending ? (
+          <EmptyState />
+        ) : (
+          <LoadingSkeleton />
+        )}
+      </div>
+
+      {/* History sidebar */}
+      <div className="hidden lg:block">
+        <Card className="sticky top-24 border-border/60 bg-card p-5" style={{ boxShadow: "var(--shadow-card)" }}>
+          <div className="mb-4 flex items-center gap-2">
+            <History className="h-4 w-4 text-primary" />
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+              Search History
+            </h3>
+          </div>
+          {historyQuery.isLoading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="h-14 animate-pulse rounded-md bg-muted/50" />
+              ))}
+            </div>
+          ) : historyItems.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No searches yet. Start your first hunt above!</p>
+          ) : (
+            <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-1">
+              {historyItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => restoreHistory(item)}
+                  className="w-full rounded-lg border border-border/60 bg-background p-3 text-left transition-all hover:border-primary/40 hover:shadow-sm"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium">{item.niche}</p>
+                      <p className="truncate text-xs text-muted-foreground">{item.city}</p>
+                    </div>
+                    <Badge variant="secondary" className="shrink-0 text-[10px]">
+                      {item.results.length} leads
+                    </Badge>
+                  </div>
+                  <div className="mt-1.5 flex items-center gap-1 text-[10px] text-muted-foreground">
+                    <Clock className="h-3 w-3" />
+                    {new Date(item.created_at).toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </Card>
+      </div>
     </div>
   );
 }
