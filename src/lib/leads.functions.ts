@@ -50,7 +50,7 @@ export const searchLeads = createServerFn({ method: "POST" })
     const city = data.city.trim();
     const niche = data.niche.trim();
     if (!city || !niche) throw new Error("city and niche cannot be empty");
-    const limit = Math.min(Math.max(data.limit ?? 20, 1), 50);
+    const limit = 3;
     return { city, niche, limit };
   })
   .handler(async ({ data }) => {
@@ -63,7 +63,7 @@ export const searchLeads = createServerFn({ method: "POST" })
       language: "en",
       locationQuery: data.city,
       maxCompetitorsToAnalyze: 0,
-      maxCrawledPlacesPerSearch: data.limit,
+      maxCrawledPlacesPerSearch: 3,
       maxReviews: 3,
       maximumLeadsEnrichmentRecords: 0,
       reviewsSort: "newest",

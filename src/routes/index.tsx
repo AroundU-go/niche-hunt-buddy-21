@@ -1,396 +1,943 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useMutation } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { useState, lazy, Suspense } from "react";
 import {
   Crosshair,
-  MapPin,
-  Phone,
-  Star,
-  ExternalLink,
   Loader2,
-  Target,
-  TrendingUp,
-  Search,
-  Building2,
+  Globe2,
+  ShieldCheck,
+  Clock,
+  Send,
+  ChevronRight,
+  X as XIcon,
 } from "lucide-react";
-import { searchLeads, type Lead } from "@/lib/leads.functions";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
+import { useAuth, SignInButton, UserButton } from "@clerk/tanstack-react-start";
+import { auth } from "@clerk/tanstack-react-start/server";
+
+const GlobeLeads = lazy(() => import("@/components/GlobeLeads"));
 
 export const Route = createFileRoute("/")({
+  beforeLoad: async () => {
+    const { userId } = await auth();
+    if (userId) {
+      throw redirect({ to: "/dashboard" });
+    }
+  },
   head: () => ({
     meta: [
-      { title: "HuntX — Web Design Leads Finder" },
+      { title: "HuntX — Find Businesses That Need a Website" },
       {
         name: "description",
         content:
-          "Find local businesses without websites. HuntX scrapes Google Maps and scores web design leads by ratings, reviews, and phone availability.",
+          "HuntX helps web agencies and freelancers find local businesses that don't have a website — so you can reach out first and close more deals.",
       },
-      { property: "og:title", content: "HuntX — Web Design Leads Finder" },
+      {
+        property: "og:title",
+        content: "HuntX — Find Businesses That Need a Website",
+      },
       {
         property: "og:description",
-        content: "Hunt local businesses that need a website. Scored, sorted, ready to pitch.",
+        content:
+          "Hunt local businesses that need a website. Scored, sorted, ready to pitch.",
       },
     ],
   }),
-  component: Dashboard,
+  component: LandingPage,
 });
 
-function scoreColor(score: number) {
-  if (score >= 75) return "text-primary";
-  if (score >= 50) return "text-chart-2";
-  if (score >= 30) return "text-chart-3";
-  return "text-muted-foreground";
-}
+/* ──────────────────────────────────────────────────────────
+ *  LANDING PAGE
+ * ────────────────────────────────────────────────────────── */
 
-function scoreLabel(score: number) {
-  if (score >= 75) return "Hot";
-  if (score >= 50) return "Warm";
-  if (score >= 30) return "Cool";
-  return "Cold";
-}
-
-function Dashboard() {
-  const [city, setCity] = useState("Austin, USA");
-  const [niche, setNiche] = useState("barber shop");
-  const [results, setResults] = useState<Lead[]>([]);
-  const [meta, setMeta] = useState<{ city: string; niche: string } | null>(null);
-
-  const runSearch = useServerFn(searchLeads);
-
-  const mutation = useMutation({
-    mutationFn: async (vars: { city: string; niche: string }) =>
-      runSearch({ data: { city: vars.city, niche: vars.niche, limit: 25 } }),
-    onSuccess: (data) => {
-      setResults(data.leads);
-      setMeta({ city: data.city, niche: data.niche });
-      if (data.leads.length === 0) {
-        toast.info("No leads found. Try a broader city or different niche.");
-      } else {
-        toast.success(`Found ${data.leads.length} leads without websites`);
-      }
-    },
-    onError: (err: Error) => {
-      toast.error(err.message || "Search failed");
-    },
-  });
-
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!city.trim() || !niche.trim()) return;
-    mutation.mutate({ city: city.trim(), niche: niche.trim() });
-  };
-
-  const hotCount = results.filter((r) => r.leadScore >= 75).length;
-  const withPhone = results.filter((r) => r.phone).length;
-  const avgRating =
-    results.length > 0
-      ? (
-          results.reduce((s, r) => s + (r.totalScore ?? 0), 0) /
-          results.filter((r) => r.totalScore != null).length
-        ).toFixed(1)
-      : "—";
+function LandingPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isLoaded, isSignedIn } = useAuth();
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <header className="border-b border-border/60 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-          <div className="flex items-center gap-3">
+    <div className="min-h-screen bg-background text-foreground" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+      {/* ===== HEADER / NAV ===== */}
+      <header
+        id="header"
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 50,
+          backdropFilter: "blur(16px)",
+          background: "oklch(0.985 0.002 120 / 0.85)",
+          borderBottom: "1px solid oklch(0 0 0 / 0.06)",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 1200,
+            margin: "0 auto",
+            padding: "0 24px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            height: 72,
+          }}
+        >
+          {/* Logo */}
+          <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
             <div
-              className="flex h-10 w-10 items-center justify-center rounded-lg"
-              style={{ background: "var(--gradient-hunt)", boxShadow: "var(--glow-primary)" }}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 10,
+                background: "var(--gradient-hunt)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
             >
-              <Crosshair className="h-5 w-5 text-primary-foreground" strokeWidth={2.5} />
+              <Crosshair style={{ width: 20, height: 20, color: "white" }} strokeWidth={2.5} />
             </div>
-            <div>
-              <h1 className="text-lg font-bold tracking-tight">HuntX</h1>
-              <p className="text-xs text-muted-foreground">Web design leads finder</p>
-            </div>
-          </div>
-          <Badge variant="outline" className="border-primary/30 text-primary">
-            <Target className="mr-1 h-3 w-3" />
-            Live hunt
-          </Badge>
-        </div>
-      </header>
+            <span
+              style={{
+                fontSize: "1.25rem",
+                fontWeight: 800,
+                color: "oklch(0.18 0.02 250)",
+                letterSpacing: "-0.02em",
+              }}
+            >
+              HuntX
+            </span>
+          </a>
 
-      <main className="mx-auto max-w-7xl px-6 py-8">
-        {/* Search panel */}
-        <Card className="mb-8 border-border/60 bg-card p-6" style={{ boxShadow: "var(--shadow-card)" }}>
-          <div className="mb-4 flex items-center gap-2">
-            <Search className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              New hunt
-            </h2>
-          </div>
-          <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-[1fr_1fr_auto]">
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">City</label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  placeholder="Austin, USA"
-                  className="pl-9"
-                  disabled={mutation.isPending}
-                />
-              </div>
-            </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                Business niche
-              </label>
-              <div className="relative">
-                <Building2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  value={niche}
-                  onChange={(e) => setNiche(e.target.value)}
-                  placeholder="barber shop, plumber, dentist…"
-                  className="pl-9"
-                  disabled={mutation.isPending}
-                />
-              </div>
-            </div>
-            <div className="flex items-end">
-              <Button
-                type="submit"
-                disabled={mutation.isPending}
-                className="w-full font-semibold md:w-auto"
-                style={{ background: "var(--gradient-hunt)", color: "var(--primary-foreground)" }}
+          {/* Desktop Nav */}
+          <nav
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 32,
+            }}
+            className="desktop-nav"
+          >
+            {["Features", "How It Works", "Pricing", "Blog", "Resources"].map((item) => (
+              <a
+                key={item}
+                href={`#${item.toLowerCase().replace(/\s+/g, "-")}`}
+                style={{
+                  fontSize: "0.9rem",
+                  fontWeight: 500,
+                  color: "oklch(0.4 0.02 250)",
+                  textDecoration: "none",
+                  transition: "color 0.15s",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "oklch(0.18 0.02 250)")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "oklch(0.4 0.02 250)")}
               >
-                {mutation.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Hunting…
-                  </>
-                ) : (
-                  <>
-                    <Crosshair className="mr-2 h-4 w-4" />
-                    Start hunt
-                  </>
-                )}
-              </Button>
-            </div>
-          </form>
-          {mutation.isPending && (
-            <p className="mt-3 text-xs text-muted-foreground">
-              Scanning Google Maps for {niche} in {city} without a website. This may take 30–90 seconds.
-            </p>
-          )}
-        </Card>
+                {item}
+              </a>
+            ))}
+          </nav>
 
-        {/* Stats */}
-        {results.length > 0 && (
-          <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
-            <StatCard label="Total leads" value={String(results.length)} icon={Target} />
-            <StatCard
-              label="Hot leads"
-              value={String(hotCount)}
-              icon={TrendingUp}
-              accent
-            />
-            <StatCard label="With phone" value={String(withPhone)} icon={Phone} />
-            <StatCard label="Avg rating" value={avgRating} icon={Star} />
+          {/* Desktop CTA */}
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }} className="desktop-nav">
+            {isLoaded && !isSignedIn && (
+              <>
+                <SignInButton mode="redirect">
+                  <button
+                    style={{
+                      fontSize: "0.9rem",
+                      fontWeight: 500,
+                      color: "oklch(0.3 0.02 250)",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Log in
+                  </button>
+                </SignInButton>
+                <Link to="/sign-up" className="btn-primary" style={{ padding: "10px 22px", fontSize: "0.85rem" }}>
+                  Get Started
+                </Link>
+              </>
+            )}
+            {isLoaded && isSignedIn && (
+              <>
+                <Link
+                  to="/dashboard"
+                  style={{
+                    fontSize: "0.9rem",
+                    fontWeight: 500,
+                    color: "oklch(0.3 0.02 250)",
+                    textDecoration: "none",
+                  }}
+                >
+                  Dashboard
+                </Link>
+                <UserButton afterSignOutUrl="/" />
+              </>
+            )}
           </div>
-        )}
 
-        {/* Results */}
-        {results.length > 0 ? (
-          <div>
-            <div className="mb-4 flex items-baseline justify-between">
-              <h2 className="text-lg font-semibold">
-                Leads for <span className="text-primary">{meta?.niche}</span> in{" "}
-                <span className="text-primary">{meta?.city}</span>
-              </h2>
-              <p className="text-xs text-muted-foreground">Sorted by lead score</p>
-            </div>
-            <div className="grid gap-4">
-              {results.map((lead) => (
-                <LeadCard key={lead.placeId} lead={lead} />
-              ))}
-            </div>
-          </div>
-        ) : !mutation.isPending ? (
-          <EmptyState />
-        ) : (
-          <LoadingSkeleton />
-        )}
-      </main>
-    </div>
-  );
-}
-
-function StatCard({
-  label,
-  value,
-  icon: Icon,
-  accent,
-}: {
-  label: string;
-  value: string;
-  icon: React.ComponentType<{ className?: string }>;
-  accent?: boolean;
-}) {
-  return (
-    <Card
-      className={`border-border/60 bg-card p-4 ${accent ? "border-primary/40" : ""}`}
-      style={accent ? { boxShadow: "var(--glow-primary)" } : undefined}
-    >
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
-          <p className={`mt-1 text-2xl font-bold ${accent ? "text-primary" : ""}`}>{value}</p>
-        </div>
-        <Icon className={`h-5 w-5 ${accent ? "text-primary" : "text-muted-foreground"}`} />
-      </div>
-    </Card>
-  );
-}
-
-function LeadCard({ lead }: { lead: Lead }) {
-  return (
-    <Card className="border-border/60 bg-card p-5 transition-colors hover:border-primary/40">
-      <div className="flex flex-col gap-4 md:flex-row md:items-start">
-        {/* Score badge */}
-        <div className="flex flex-row items-center gap-3 md:w-24 md:flex-col md:items-center">
-          <div className="text-center">
-            <div className={`text-3xl font-bold ${scoreColor(lead.leadScore)}`}>
-              {lead.leadScore}
-            </div>
-            <div className={`text-[10px] font-semibold uppercase tracking-widest ${scoreColor(lead.leadScore)}`}>
-              {scoreLabel(lead.leadScore)}
-            </div>
-          </div>
+          {/* Mobile menu toggle */}
+          <button
+            className="mobile-menu-btn"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            style={{
+              display: "none",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: 8,
+            }}
+          >
+            {mobileMenuOpen ? (
+              <XIcon style={{ width: 24, height: 24 }} />
+            ) : (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 12h18M3 6h18M3 18h18" />
+              </svg>
+            )}
+          </button>
         </div>
 
-        {/* Details */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <h3 className="truncate text-base font-semibold">{lead.title}</h3>
-              {lead.categoryName && (
-                <p className="text-xs text-muted-foreground">{lead.categoryName}</p>
+        {/* Mobile Nav */}
+        {mobileMenuOpen && (
+          <div
+            className="mobile-nav"
+            style={{
+              padding: "16px 24px 24px",
+              borderTop: "1px solid oklch(0 0 0 / 0.06)",
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+            }}
+          >
+            {["Features", "How It Works", "Pricing", "Blog", "Resources"].map((item) => (
+              <a
+                key={item}
+                href={`#${item.toLowerCase().replace(/\s+/g, "-")}`}
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: 500,
+                  color: "oklch(0.3 0.02 250)",
+                  textDecoration: "none",
+                  padding: "8px 0",
+                }}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {item}
+              </a>
+            ))}
+            <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+              {isLoaded && !isSignedIn && (
+                <>
+                  <SignInButton mode="redirect">
+                    <button style={{ fontSize: "0.9rem", fontWeight: 500, color: "oklch(0.3 0.02 250)", background: "none", border: "none", cursor: "pointer", padding: "10px 0" }}>
+                      Log in
+                    </button>
+                  </SignInButton>
+                  <Link to="/sign-up" className="btn-primary" style={{ padding: "10px 22px", fontSize: "0.85rem" }}>
+                    Get Started
+                  </Link>
+                </>
+              )}
+              {isLoaded && isSignedIn && (
+                <Link to="/dashboard" style={{ fontSize: "0.9rem", fontWeight: 500, color: "oklch(0.3 0.02 250)", textDecoration: "none", padding: "10px 0" }}>
+                  Dashboard
+                </Link>
               )}
             </div>
-            {lead.url && (
-              <a
-                href={lead.url}
-                target="_blank"
-                rel="noreferrer"
-                className="shrink-0 text-xs text-primary hover:underline inline-flex items-center gap-1"
+          </div>
+        )}
+      </header>
+
+      {/* ===== HERO ===== */}
+      <section
+        id="hero"
+        className="landing-section"
+        style={{
+          maxWidth: 1200,
+          margin: "0 auto",
+          padding: "4rem 24px 2rem",
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          alignItems: "center",
+          gap: "2rem",
+        }}
+      >
+        {/* Left — Copy */}
+        <div>
+          {/* Badge */}
+          <div className="hero-badge" style={{ marginBottom: 24 }}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path
+                d="M8 1L9.5 6.5L15 8L9.5 9.5L8 15L6.5 9.5L1 8L6.5 6.5L8 1Z"
+                fill="oklch(0.55 0.2 145)"
+                opacity="0.7"
+              />
+            </svg>
+            Find High-Quality Leads. Close More Clients.
+          </div>
+
+          {/* Headline */}
+          <h1
+            style={{
+              fontSize: "clamp(2.2rem, 4.5vw, 3.6rem)",
+              fontWeight: 800,
+              lineHeight: 1.1,
+              letterSpacing: "-0.03em",
+              color: "oklch(0.12 0.02 250)",
+              marginBottom: 20,
+            }}
+          >
+            Find Businesses
+            <br />
+            That{" "}
+            <span style={{ color: "oklch(0.45 0.18 145)" }}>Need a Website.</span>
+          </h1>
+
+          {/* Subtitle */}
+          <p
+            style={{
+              fontSize: "1.1rem",
+              lineHeight: 1.7,
+              color: "oklch(0.45 0.02 250)",
+              maxWidth: 480,
+              marginBottom: 32,
+            }}
+          >
+            HuntX helps web agencies and freelancers find local businesses that
+            don't have a website—so you can reach out first and close more deals.
+          </p>
+
+          {/* CTA Button */}
+          <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 36 }}>
+            <Link to="/dashboard" className="btn-primary">
+              Find businesses
+              <ChevronRight style={{ width: 18, height: 18 }} />
+            </Link>
+          </div>
+
+          {/* Feature Pills */}
+          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+            <span className="feature-pill">
+              <Globe2 />
+              Find leads without websites
+            </span>
+            <span className="feature-pill">
+              <ShieldCheck />
+              Verified contact info
+            </span>
+            <span className="feature-pill">
+              <Send />
+              Export & reach out instantly
+            </span>
+          </div>
+        </div>
+
+        {/* Right — Globe */}
+        <div style={{ position: "relative" }}>
+          <Suspense
+            fallback={
+              <div
+                style={{
+                  width: "100%",
+                  aspectRatio: "1",
+                  borderRadius: "50%",
+                  background: "oklch(0.96 0.005 120)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
               >
-                Google Maps <ExternalLink className="h-3 w-3" />
-              </a>
-            )}
+                <Loader2 style={{ width: 40, height: 40, animation: "spin 1s linear infinite", color: "oklch(0.55 0.2 145)" }} />
+              </div>
+            }
+          >
+            <GlobeLeads />
+          </Suspense>
+        </div>
+      </section>
+
+      {/* ===== TRUST BAR ===== */}
+      <section
+        id="trust"
+        style={{
+          borderTop: "1px solid oklch(0 0 0 / 0.06)",
+          borderBottom: "1px solid oklch(0 0 0 / 0.06)",
+          padding: "3rem 24px",
+          textAlign: "center",
+        }}
+      >
+        <p
+          style={{
+            fontSize: "0.9rem",
+            color: "oklch(0.5 0.02 250)",
+            marginBottom: 24,
+            fontWeight: 500,
+          }}
+        >
+          Trusted by{" "}
+          <span style={{ fontWeight: 700, color: "oklch(0.25 0.02 250)" }}>100+ agencies</span>{" "}
+          and freelancers worldwide
+        </p>
+        <div className="trust-logos">
+          <span style={{ fontFamily: "Georgia, serif", fontStyle: "italic", letterSpacing: "-0.03em" }}>webflow</span>
+          <span>Framer</span>
+          <span style={{ fontWeight: 800 }}>Wix</span>
+          <span style={{ fontSize: "0.85rem", letterSpacing: "0.12em", textTransform: "uppercase" as const }}>Squarespace</span>
+          <span style={{ fontWeight: 800 }}>WordPress</span>
+          <span style={{ fontStyle: "italic", letterSpacing: "-0.02em" }}>stripe</span>
+        </div>
+      </section>
+
+      {/* ===== FEATURES ===== */}
+      <section id="features" className="landing-section" style={{ maxWidth: 1200, margin: "0 auto", padding: "5rem 24px" }}>
+        <div style={{ textAlign: "center", marginBottom: 48 }}>
+          <p
+            style={{
+              fontSize: "0.9rem",
+              fontWeight: 600,
+              color: "oklch(0.45 0.18 145)",
+              marginBottom: 12,
+              textTransform: "uppercase" as const,
+              letterSpacing: "0.05em",
+            }}
+          >
+            Why Agencies Choose HuntX
+          </p>
+          <h2
+            style={{
+              fontSize: "clamp(1.8rem, 3vw, 2.6rem)",
+              fontWeight: 800,
+              lineHeight: 1.15,
+              letterSpacing: "-0.02em",
+              color: "oklch(0.12 0.02 250)",
+            }}
+          >
+            Built to Help You{" "}
+            <span style={{ color: "oklch(0.45 0.18 145)" }}>Find, Reach & Close</span>
+            <br />
+            More Clients
+          </h2>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+            gap: 24,
+          }}
+        >
+          {[
+            {
+              icon: <Globe2 />,
+              title: "Find Local Businesses",
+              desc: "Discover businesses in any location that don't have a website yet.",
+            },
+            {
+              icon: <ShieldCheck />,
+              title: "Verified & Accurate",
+              desc: "Get accurate business information you can trust to reach out.",
+            },
+            {
+              icon: <Clock />,
+              title: "Save Time",
+              desc: "Stop manual research. Get fresh leads in seconds.",
+            },
+            {
+              icon: <Send />,
+              title: "Close More Deals",
+              desc: "More leads = more opportunities = more clients.",
+            },
+          ].map((feat) => (
+            <div key={feat.title} className="feature-card">
+              <div className="icon-wrap">{feat.icon}</div>
+              <h3
+                style={{
+                  fontSize: "1.1rem",
+                  fontWeight: 700,
+                  color: "oklch(0.15 0.02 250)",
+                  marginBottom: 8,
+                }}
+              >
+                {feat.title}
+              </h3>
+              <p
+                style={{
+                  fontSize: "0.9rem",
+                  lineHeight: 1.65,
+                  color: "oklch(0.45 0.02 250)",
+                }}
+              >
+                {feat.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ===== HOW IT WORKS ===== */}
+      <section
+        id="how-it-works"
+        className="landing-section"
+        style={{
+          background: "oklch(0.97 0.003 120)",
+          padding: "5rem 24px",
+        }}
+      >
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 48 }}>
+            <p
+              style={{
+                fontSize: "0.9rem",
+                fontWeight: 600,
+                color: "oklch(0.45 0.18 145)",
+                marginBottom: 12,
+                textTransform: "uppercase" as const,
+                letterSpacing: "0.05em",
+              }}
+            >
+              How It Works
+            </p>
+            <h2
+              style={{
+                fontSize: "clamp(1.8rem, 3vw, 2.6rem)",
+                fontWeight: 800,
+                lineHeight: 1.15,
+                letterSpacing: "-0.02em",
+                color: "oklch(0.12 0.02 250)",
+              }}
+            >
+              Three Simple Steps
+            </h2>
           </div>
 
-          <div className="mt-3 grid gap-2 text-sm md:grid-cols-2">
-            {lead.address && (
-              <div className="flex items-start gap-2 text-muted-foreground">
-                <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                <span className="truncate">{lead.address}</span>
-              </div>
-            )}
-            {lead.phone ? (
-              <div className="flex items-center gap-2">
-                <Phone className="h-3.5 w-3.5 text-primary" />
-                <a
-                  href={`tel:${lead.phoneUnformatted ?? lead.phone}`}
-                  className="font-medium text-foreground hover:text-primary"
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+              gap: 32,
+            }}
+          >
+            {[
+              {
+                step: "01",
+                title: "Enter a City & Niche",
+                desc: "Tell us where and what type of businesses you want to find — barbers, dentists, plumbers, anything.",
+              },
+              {
+                step: "02",
+                title: "We Scan & Score",
+                desc: "HuntX scans Google Maps, filters businesses without websites, and scores each lead.",
+              },
+              {
+                step: "03",
+                title: "Reach Out & Close",
+                desc: "Get phone numbers, emails, and all the info you need to pitch your services and win new clients.",
+              },
+            ].map((s) => (
+              <div
+                key={s.step}
+                style={{
+                  background: "white",
+                  borderRadius: 20,
+                  padding: "2rem",
+                  border: "1px solid oklch(0 0 0 / 0.06)",
+                  transition: "transform 0.2s, box-shadow 0.2s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translateY(-4px)";
+                  e.currentTarget.style.boxShadow = "var(--shadow-card-hover)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "none";
+                }}
+              >
+                <div
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 14,
+                    background: "var(--gradient-hunt)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "white",
+                    fontSize: "0.85rem",
+                    fontWeight: 800,
+                    marginBottom: 20,
+                  }}
                 >
-                  {lead.phone}
-                </a>
+                  {s.step}
+                </div>
+                <h3
+                  style={{
+                    fontSize: "1.15rem",
+                    fontWeight: 700,
+                    color: "oklch(0.15 0.02 250)",
+                    marginBottom: 8,
+                  }}
+                >
+                  {s.title}
+                </h3>
+                <p
+                  style={{
+                    fontSize: "0.9rem",
+                    lineHeight: 1.65,
+                    color: "oklch(0.45 0.02 250)",
+                  }}
+                >
+                  {s.desc}
+                </p>
               </div>
-            ) : (
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Phone className="h-3.5 w-3.5" />
-                <span className="italic">No phone</span>
-              </div>
-            )}
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== PRICING ===== */}
+      <section id="pricing" className="landing-section" style={{ maxWidth: 1200, margin: "0 auto", padding: "5rem 24px" }}>
+        <div style={{ textAlign: "center", marginBottom: 48 }}>
+          <p
+            style={{
+              fontSize: "0.9rem",
+              fontWeight: 600,
+              color: "oklch(0.45 0.18 145)",
+              marginBottom: 12,
+              textTransform: "uppercase" as const,
+              letterSpacing: "0.05em",
+            }}
+          >
+            Pricing
+          </p>
+          <h2
+            style={{
+              fontSize: "clamp(1.8rem, 3vw, 2.6rem)",
+              fontWeight: 800,
+              lineHeight: 1.15,
+              letterSpacing: "-0.02em",
+              color: "oklch(0.12 0.02 250)",
+            }}
+          >
+            Simple, Transparent Pricing
+          </h2>
+          <p style={{ color: "oklch(0.5 0.02 250)", marginTop: 12, fontSize: "1rem" }}>
+            Start free. Upgrade when you're ready.
+          </p>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+            gap: 24,
+            maxWidth: 780,
+            margin: "0 auto",
+          }}
+        >
+          {/* Starter Plan */}
+          <div className="pricing-card">
+            <p style={{ fontSize: "0.85rem", fontWeight: 600, color: "oklch(0.5 0.02 250)", textTransform: "uppercase" as const, letterSpacing: "0.05em", marginBottom: 8 }}>
+              Starter
+            </p>
+            <div style={{ marginBottom: 24 }}>
+              <span style={{ fontSize: "3rem", fontWeight: 800, color: "oklch(0.12 0.02 250)" }}>$9</span>
+              <span style={{ fontSize: "1rem", color: "oklch(0.5 0.02 250)" }}>/mo</span>
+            </div>
+            <ul className="pricing-feature-list">
+              <PricingItem included label="100 leads per month" />
+              <PricingItem included label="Save to library" />
+              <PricingItem included label="Phone numbers" />
+              <PricingItem included label="Prioritized lead scoring" />
+              <PricingItem included={false} label="Email addresses" />
+              <PricingItem included={false} label="CSV export" />
+              <PricingItem included={false} label="Ready to send emails" />
+            </ul>
+            <a
+              href="#"
+              className="btn-outline"
+              style={{
+                width: "100%",
+                justifyContent: "center",
+                marginTop: 28,
+                padding: "12px 20px",
+              }}
+            >
+              Get Started
+            </a>
           </div>
 
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            {lead.totalScore != null && (
-              <Badge variant="secondary" className="gap-1">
-                <Star className="h-3 w-3 fill-current" />
-                {lead.totalScore.toFixed(1)}
-                <span className="text-muted-foreground">
-                  ({lead.reviewsCount ?? 0})
-                </span>
-              </Badge>
-            )}
-            {!lead.hasWebsite && (
-              <Badge className="bg-primary/15 text-primary border border-primary/30 hover:bg-primary/20">
-                No website
-              </Badge>
-            )}
-            {lead.neighborhood && (
-              <Badge variant="outline" className="text-muted-foreground">
-                {lead.neighborhood}
-              </Badge>
-            )}
+          {/* Basic Plan */}
+          <div className="pricing-card featured">
+            <div
+              style={{
+                position: "absolute",
+                top: 16,
+                right: 16,
+                background: "oklch(0.92 0.04 145)",
+                color: "oklch(0.35 0.15 145)",
+                fontSize: "0.75rem",
+                fontWeight: 700,
+                padding: "4px 12px",
+                borderRadius: 999,
+              }}
+            >
+              Most Popular
+            </div>
+            <p style={{ fontSize: "0.85rem", fontWeight: 600, color: "oklch(0.5 0.02 250)", textTransform: "uppercase" as const, letterSpacing: "0.05em", marginBottom: 8 }}>
+              Basic
+            </p>
+            <div style={{ marginBottom: 24 }}>
+              <span style={{ fontSize: "3rem", fontWeight: 800, color: "oklch(0.12 0.02 250)" }}>$49</span>
+              <span style={{ fontSize: "1rem", color: "oklch(0.5 0.02 250)" }}>/mo</span>
+            </div>
+            <ul className="pricing-feature-list">
+              <PricingItem included label="1,000 leads per month" />
+              <PricingItem included label="Save to library" />
+              <PricingItem included label="Phone numbers" />
+              <PricingItem included label="Prioritized lead scoring" />
+              <PricingItem included label="Email addresses" />
+              <PricingItem included label="CSV export" />
+              <PricingItem included label="Ready to send emails" />
+            </ul>
+            <a
+              href="#"
+              className="btn-primary"
+              style={{
+                width: "100%",
+                justifyContent: "center",
+                marginTop: 28,
+                padding: "12px 20px",
+              }}
+            >
+              Start Free Trial
+              <ChevronRight style={{ width: 16, height: 16 }} />
+            </a>
+          </div>
+        </div>
+      </section>
+
+
+
+      {/* ===== CTA ===== */}
+      <section
+        style={{
+          textAlign: "center",
+          padding: "5rem 24px",
+          background: "var(--gradient-hunt)",
+        }}
+      >
+        <h2
+          style={{
+            fontSize: "clamp(1.6rem, 3vw, 2.4rem)",
+            fontWeight: 800,
+            color: "white",
+            lineHeight: 1.2,
+            marginBottom: 16,
+          }}
+        >
+          Ready to Find Your Next Client?
+        </h2>
+        <p style={{ fontSize: "1.05rem", color: "oklch(1 0 0 / 0.8)", marginBottom: 28, maxWidth: 480, margin: "0 auto 28px" }}>
+          Join 100+ agencies already using HuntX to find and close more web design deals.
+        </p>
+        <a
+          href="#pricing"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "14px 32px",
+            background: "white",
+            color: "oklch(0.35 0.15 145)",
+            borderRadius: 12,
+            fontWeight: 700,
+            fontSize: "1rem",
+            textDecoration: "none",
+            transition: "transform 0.15s, box-shadow 0.15s",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "translateY(-2px)";
+            e.currentTarget.style.boxShadow = "0 8px 24px oklch(0 0 0 / 0.2)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "translateY(0)";
+            e.currentTarget.style.boxShadow = "none";
+          }}
+        >
+          Start Free Trial
+          <ChevronRight style={{ width: 18, height: 18 }} />
+        </a>
+      </section>
+
+      {/* ===== FOOTER ===== */}
+      <footer
+        style={{
+          borderTop: "1px solid oklch(0 0 0 / 0.06)",
+          padding: "3rem 24px 2rem",
+          background: "oklch(0.985 0.002 120)",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 1200,
+            margin: "0 auto",
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+            gap: 40,
+          }}
+        >
+          {/* Brand */}
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+              <div
+                style={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: 8,
+                  background: "var(--gradient-hunt)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Crosshair style={{ width: 16, height: 16, color: "white" }} strokeWidth={2.5} />
+              </div>
+              <span style={{ fontWeight: 800, fontSize: "1.05rem", color: "oklch(0.18 0.02 250)" }}>HuntX</span>
+            </div>
+            <p style={{ fontSize: "0.85rem", color: "oklch(0.5 0.02 250)", lineHeight: 1.65, maxWidth: 250 }}>
+              Find local businesses that need a website. Score, sort, and close more deals.
+            </p>
           </div>
 
-          {lead.topReviews.length > 0 && (
-            <details className="mt-3 group">
-              <summary className="cursor-pointer text-xs text-muted-foreground hover:text-foreground">
-                Show recent reviews ({lead.topReviews.length})
-              </summary>
-              <div className="mt-2 space-y-2">
-                {lead.topReviews.map((r, i) => (
-                  <div
-                    key={i}
-                    className="rounded-md border border-border/60 bg-muted/40 p-3 text-xs"
+          {/* Links */}
+          {[
+            {
+              title: "Product",
+              links: ["Features", "Pricing", "How It Works", "Changelog"],
+            },
+            {
+              title: "Resources",
+              links: ["Blog", "Help Center", "Community", "API Docs"],
+            },
+            {
+              title: "Company",
+              links: ["About", "Careers", "Contact", "Privacy"],
+            },
+          ].map((col) => (
+            <div key={col.title}>
+              <p style={{ fontSize: "0.8rem", fontWeight: 700, color: "oklch(0.3 0.02 250)", marginBottom: 12, textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>
+                {col.title}
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {col.links.map((link) => (
+                  <a
+                    key={link}
+                    href="#"
+                    style={{
+                      fontSize: "0.85rem",
+                      color: "oklch(0.5 0.02 250)",
+                      textDecoration: "none",
+                      transition: "color 0.15s",
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "oklch(0.25 0.02 250)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "oklch(0.5 0.02 250)")}
                   >
-                    <div className="mb-1 flex items-center gap-2">
-                      {r.stars != null && (
-                        <span className="flex items-center gap-0.5 text-primary">
-                          {Array.from({ length: r.stars }).map((_, k) => (
-                            <Star key={k} className="h-3 w-3 fill-current" />
-                          ))}
-                        </span>
-                      )}
-                      {r.name && <span className="font-medium">{r.name}</span>}
-                    </div>
-                    {r.text && <p className="text-muted-foreground line-clamp-3">{r.text}</p>}
-                  </div>
+                    {link}
+                  </a>
                 ))}
               </div>
-            </details>
-          )}
+            </div>
+          ))}
         </div>
-      </div>
-    </Card>
-  );
-}
 
-function EmptyState() {
-  return (
-    <div className="rounded-lg border border-dashed border-border/60 bg-card/40 p-12 text-center">
-      <Crosshair className="mx-auto h-10 w-10 text-muted-foreground" />
-      <h3 className="mt-4 text-base font-semibold">Ready to hunt</h3>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Enter a city and business niche above to find leads without websites.
-      </p>
-    </div>
-  );
-}
-
-function LoadingSkeleton() {
-  return (
-    <div className="grid gap-4">
-      {Array.from({ length: 4 }).map((_, i) => (
         <div
-          key={i}
-          className="h-32 animate-pulse rounded-lg border border-border/60 bg-card/50"
-        />
-      ))}
+          style={{
+            maxWidth: 1200,
+            margin: "40px auto 0",
+            paddingTop: 20,
+            borderTop: "1px solid oklch(0 0 0 / 0.06)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 12,
+          }}
+        >
+          <p style={{ fontSize: "0.8rem", color: "oklch(0.55 0.02 250)" }}>
+            © {new Date().getFullYear()} HuntX. All rights reserved.
+          </p>
+          <div style={{ display: "flex", gap: 20 }}>
+            <a href="#" style={{ fontSize: "0.8rem", color: "oklch(0.55 0.02 250)", textDecoration: "none" }}>
+              Terms
+            </a>
+            <a href="#" style={{ fontSize: "0.8rem", color: "oklch(0.55 0.02 250)", textDecoration: "none" }}>
+              Privacy
+            </a>
+            <a href="#" style={{ fontSize: "0.8rem", color: "oklch(0.55 0.02 250)", textDecoration: "none" }}>
+              Cookies
+            </a>
+          </div>
+        </div>
+      </footer>
+
+      {/* ===== RESPONSIVE STYLES (inline via style tag) ===== */}
+      <style>{`
+        .desktop-nav { display: flex !important; }
+        .mobile-menu-btn { display: none !important; }
+        .mobile-nav { display: none !important; }
+
+        @media (max-width: 768px) {
+          .desktop-nav { display: none !important; }
+          .mobile-menu-btn { display: block !important; }
+          .mobile-nav { display: flex !important; }
+
+          #hero {
+            grid-template-columns: 1fr !important;
+            text-align: center;
+          }
+          #hero > div:first-child {
+            order: 0;
+          }
+          #hero > div:last-child {
+            order: 1;
+          }
+          #hero .hero-badge {
+            margin-left: auto;
+            margin-right: auto;
+          }
+          #hero p {
+            margin-left: auto;
+            margin-right: auto;
+          }
+          #hero > div:first-child > div:last-child {
+            justify-content: center;
+          }
+          #hero > div:first-child > div:nth-last-child(2) {
+            justify-content: center;
+          }
+        }
+      `}</style>
     </div>
+  );
+}
+
+/* ────────────────────────────
+ *  PRICING ITEM
+ * ──────────────────────────── */
+
+function PricingItem({ included, label }: { included: boolean; label: string }) {
+  return (
+    <li className={included ? "" : "disabled"}>
+      <span className="check">
+        {included ? (
+          <svg viewBox="0 0 12 12" fill="none">
+            <path d="M2.5 6L5 8.5L9.5 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 12 12" fill="none">
+            <path d="M3 9L9 3M3 3L9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        )}
+      </span>
+      {label}
+    </li>
   );
 }

@@ -7,15 +7,8 @@
 /*
  * Design system definition.
  *
- * The @theme inline block maps CSS custom properties to Tailwind utility
- * classes (e.g. --color-primary -> bg-primary, text-primary).
- *
- * The :root and .dark blocks define the actual color values using oklch.
- * All colors MUST use oklch format.
- *
- * To add a new semantic color:
- * 1. Add the variable to :root (light value) and .dark (dark value)
- * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ * Light landing-page theme with green (oklch 0.86 0.22 130) accent.
+ * The purple from the reference design is replaced with this green.
  */
 
 @theme inline {
@@ -63,43 +56,44 @@
 
 :root {
   --radius: 0.75rem;
-  /* HuntX: hunter-style dark theme with electric lime accent */
-  --background: oklch(0.16 0.015 150);
-  --foreground: oklch(0.97 0.01 120);
-  --card: oklch(0.21 0.018 150);
-  --card-foreground: oklch(0.97 0.01 120);
-  --popover: oklch(0.21 0.018 150);
-  --popover-foreground: oklch(0.97 0.01 120);
-  --primary: oklch(0.86 0.22 130);
-  --primary-foreground: oklch(0.18 0.03 150);
-  --secondary: oklch(0.28 0.02 150);
-  --secondary-foreground: oklch(0.97 0.01 120);
-  --muted: oklch(0.24 0.015 150);
-  --muted-foreground: oklch(0.68 0.02 140);
-  --accent: oklch(0.32 0.05 140);
-  --accent-foreground: oklch(0.97 0.01 120);
-  --destructive: oklch(0.62 0.24 25);
+  /* HuntX: clean light theme with green accent */
+  --background: oklch(0.985 0.002 120);
+  --foreground: oklch(0.18 0.02 250);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.02 250);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.02 250);
+  --primary: oklch(0.55 0.2 145);
+  --primary-foreground: oklch(0.99 0.005 120);
+  --secondary: oklch(0.96 0.008 120);
+  --secondary-foreground: oklch(0.28 0.03 250);
+  --muted: oklch(0.96 0.005 120);
+  --muted-foreground: oklch(0.5 0.02 250);
+  --accent: oklch(0.94 0.02 140);
+  --accent-foreground: oklch(0.22 0.03 250);
+  --destructive: oklch(0.58 0.22 25);
   --destructive-foreground: oklch(0.98 0.01 100);
-  --border: oklch(0.3 0.02 150);
-  --input: oklch(0.26 0.018 150);
-  --ring: oklch(0.86 0.22 130);
-  --chart-1: oklch(0.86 0.22 130);
-  --chart-2: oklch(0.72 0.18 165);
+  --border: oklch(0.91 0.005 250);
+  --input: oklch(0.91 0.005 250);
+  --ring: oklch(0.55 0.2 145);
+  --chart-1: oklch(0.55 0.2 145);
+  --chart-2: oklch(0.62 0.18 165);
   --chart-3: oklch(0.65 0.2 60);
   --chart-4: oklch(0.6 0.22 25);
   --chart-5: oklch(0.55 0.15 200);
-  --sidebar: oklch(0.19 0.018 150);
-  --sidebar-foreground: oklch(0.97 0.01 120);
-  --sidebar-primary: oklch(0.86 0.22 130);
-  --sidebar-primary-foreground: oklch(0.18 0.03 150);
-  --sidebar-accent: oklch(0.28 0.02 150);
-  --sidebar-accent-foreground: oklch(0.97 0.01 120);
-  --sidebar-border: oklch(0.3 0.02 150);
-  --sidebar-ring: oklch(0.86 0.22 130);
+  --sidebar: oklch(0.98 0.003 120);
+  --sidebar-foreground: oklch(0.18 0.02 250);
+  --sidebar-primary: oklch(0.55 0.2 145);
+  --sidebar-primary-foreground: oklch(0.99 0.005 120);
+  --sidebar-accent: oklch(0.94 0.02 140);
+  --sidebar-accent-foreground: oklch(0.22 0.03 250);
+  --sidebar-border: oklch(0.91 0.005 250);
+  --sidebar-ring: oklch(0.55 0.2 145);
 
-  --gradient-hunt: linear-gradient(135deg, oklch(0.86 0.22 130) 0%, oklch(0.72 0.18 165) 100%);
-  --glow-primary: 0 0 40px oklch(0.86 0.22 130 / 0.35);
-  --shadow-card: 0 8px 32px oklch(0 0 0 / 0.4);
+  --gradient-hunt: linear-gradient(135deg, oklch(0.55 0.2 145) 0%, oklch(0.48 0.18 165) 100%);
+  --glow-primary: 0 0 40px oklch(0.55 0.2 145 / 0.2);
+  --shadow-card: 0 1px 3px oklch(0 0 0 / 0.06), 0 4px 16px oklch(0 0 0 / 0.04);
+  --shadow-card-hover: 0 4px 24px oklch(0 0 0 / 0.08), 0 8px 32px oklch(0 0 0 / 0.04);
 }
 
 .dark {
@@ -145,5 +139,363 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+/* ===== Landing Page Specific Styles ===== */
+
+/* Globe canvas container */
+.globe-container {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  aspect-ratio: 1;
+}
+
+.globe-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Floating lead cards around globe */
+.lead-card-float {
+  position: absolute;
+  background: white;
+  border-radius: 12px;
+  padding: 12px 16px;
+  box-shadow: 0 4px 24px oklch(0 0 0 / 0.08), 0 1px 4px oklch(0 0 0 / 0.04);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 200px;
+  animation: floatCard 6s ease-in-out infinite;
+  z-index: 10;
+  pointer-events: none;
+  border: 1px solid oklch(0 0 0 / 0.06);
+}
+
+.lead-card-float:nth-child(2) { animation-delay: -1.5s; }
+.lead-card-float:nth-child(3) { animation-delay: -3s; }
+.lead-card-float:nth-child(4) { animation-delay: -4.5s; }
+
+@keyframes floatCard {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.lead-card-float .avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid oklch(0.55 0.2 145 / 0.3);
+  flex-shrink: 0;
+}
+
+.lead-card-float .online-dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: oklch(0.7 0.2 145);
+  border: 2px solid white;
+  top: 10px;
+  left: 48px;
+}
+
+.lead-card-float .info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.lead-card-float .name {
+  font-weight: 600;
+  font-size: 13px;
+  color: oklch(0.2 0.02 250);
+  white-space: nowrap;
+}
+
+.lead-card-float .detail {
+  font-size: 11px;
+  color: oklch(0.5 0.02 250);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.lead-card-float .detail svg {
+  width: 11px;
+  height: 11px;
+  color: oklch(0.55 0.2 145);
+  flex-shrink: 0;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-top: 2px;
+}
+
+.status-badge.no-website {
+  background: oklch(0.93 0.06 25);
+  color: oklch(0.48 0.18 25);
+}
+
+.status-badge.outdated {
+  background: oklch(0.93 0.06 60);
+  color: oklch(0.5 0.16 60);
+}
+
+.status-badge.needs-redesign {
+  background: oklch(0.93 0.06 250);
+  color: oklch(0.48 0.15 250);
+}
+
+/* Trust bar logos */
+.trust-logos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+  opacity: 0.45;
+  filter: grayscale(100%);
+  transition: opacity 0.3s, filter 0.3s;
+}
+
+.trust-logos:hover {
+  opacity: 0.65;
+  filter: grayscale(50%);
+}
+
+.trust-logos span {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: oklch(0.35 0.02 250);
+}
+
+/* Feature cards */
+.feature-card {
+  background: white;
+  border: 1px solid oklch(0 0 0 / 0.06);
+  border-radius: 16px;
+  padding: 2rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: oklch(0.55 0.2 145 / 0.3);
+}
+
+.feature-card .icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: oklch(0.94 0.04 145);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.feature-card .icon-wrap svg {
+  width: 22px;
+  height: 22px;
+  color: oklch(0.45 0.18 145);
+}
+
+/* Pricing cards */
+.pricing-card {
+  background: white;
+  border: 1px solid oklch(0 0 0 / 0.08);
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.pricing-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 40px oklch(0 0 0 / 0.1);
+}
+
+.pricing-card.featured {
+  border-color: oklch(0.55 0.2 145 / 0.4);
+  box-shadow: 0 0 0 1px oklch(0.55 0.2 145 / 0.15), 0 4px 24px oklch(0.55 0.2 145 / 0.1);
+}
+
+.pricing-card.featured::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--gradient-hunt);
+}
+
+.pricing-feature-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pricing-feature-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: oklch(0.35 0.02 250);
+}
+
+.pricing-feature-list li .check {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: oklch(0.92 0.04 145);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pricing-feature-list li .check svg {
+  width: 12px;
+  height: 12px;
+  color: oklch(0.45 0.18 145);
+}
+
+.pricing-feature-list li.disabled {
+  opacity: 0.4;
+}
+
+.pricing-feature-list li.disabled .check {
+  background: oklch(0.92 0.005 250);
+}
+
+.pricing-feature-list li.disabled .check svg {
+  color: oklch(0.5 0.02 250);
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Section spacing */
+.landing-section {
+  padding: 5rem 0;
+}
+
+/* Hero badge */
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: oklch(0.94 0.04 145);
+  border: 1px solid oklch(0.55 0.2 145 / 0.15);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: oklch(0.35 0.15 145);
+}
+
+.hero-badge svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Feature pills */
+.feature-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: oklch(0.4 0.02 250);
+}
+
+.feature-pill svg {
+  width: 16px;
+  height: 16px;
+  color: oklch(0.55 0.2 145);
+}
+
+/* CTA buttons */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background: var(--gradient-hunt);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  text-decoration: none;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px oklch(0.55 0.2 145 / 0.35);
+}
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background: white;
+  color: oklch(0.2 0.02 250);
+  border: 1px solid oklch(0 0 0 / 0.12);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  text-decoration: none;
+}
+
+.btn-outline:hover {
+  transform: translateY(-2px);
+  border-color: oklch(0.55 0.2 145 / 0.4);
+  box-shadow: 0 4px 16px oklch(0 0 0 / 0.06);
+}
+
+/* Responsive globe */
+@media (max-width: 1024px) {
+  .globe-container {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  .lead-card-float {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .globe-container {
+    max-width: 300px;
+  }
+  .landing-section {
+    padding: 3rem 0;
   }
 }
