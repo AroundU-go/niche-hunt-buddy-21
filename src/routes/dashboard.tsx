@@ -1,7 +1,7 @@
 import { createFileRoute, redirect, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { auth } from "@clerk/tanstack-react-start/server";
 import { UserButton } from "@clerk/tanstack-react-start";
 import {
@@ -18,7 +18,7 @@ import {
   History,
   Clock,
 } from "lucide-react";
-import { searchLeads, getSearchHistory, type Lead, type SearchHistoryItem } from "@/lib/leads.functions";
+import { searchLeads, getSearchHistory, syncUserProfile, type Lead, type SearchHistoryItem } from "@/lib/leads.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -45,6 +45,13 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 function DashboardPage() {
+  const runSyncProfile = useServerFn(syncUserProfile);
+
+  // Sync user profile to Supabase on dashboard load
+  useEffect(() => {
+    runSyncProfile().catch(() => {});
+  }, []);
+
   return (
     <div
       className="min-h-screen bg-background text-foreground"

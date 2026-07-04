@@ -44,6 +44,39 @@ function computeLeadScore(item: {
   return Math.round(ratingScore + reviewScore + phoneScore + noWebBonus);
 }
 
+/* ────────────────────────────
+ *  SYNC USER PROFILE
+ * ──────────────────────────── */
+
+export const syncUserProfile = createServerFn({ method: "POST" })
+  .handler(async () => {
+    const { userId } = await auth();
+    if (!userId) {
+      return { synced: false };
+    }
+
+    const user = await clerkClient.users.getUser(userId);
+    const email = user.emailAddresses?.[0]?.emailAddress ?? "";
+
+    const { error } = await supabase.from("profiles").upsert(
+      {
+        id: userId,
+        email,
+        first_name: user.firstName ?? null,
+        last_name: user.lastName ?? null,
+        last_login: new Date().toISOString(),
+      },
+      { onConflict: "id" }
+    );
+
+    if (error) {
+      console.error("Supabase profile sync error:", error.message);
+      return { synced: false };
+    }
+
+    return { synced: true };
+  });
+
 export const searchLeads = createServerFn({ method: "POST" })
   .inputValidator((data: { city: string; niche: string; limit?: number }) => {
     if (!data || typeof data.city !== "string" || typeof data.niche !== "string") {
