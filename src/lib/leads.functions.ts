@@ -85,13 +85,13 @@ export const searchLeads = createServerFn({ method: "POST" })
     const city = data.city.trim();
     const niche = data.niche.trim();
     if (!city || !niche) throw new Error("city and niche cannot be empty");
-    const limit = 3;
-    return { city, niche, limit };
+    return { city, niche };
   })
   .handler(async ({ data }) => {
     const token = process.env.APIFY_TOKEN;
     if (!token) throw new Error("APIFY_TOKEN not configured");
 
+    let limit = 3;
     // --- Clerk: get authenticated user ---
     let userId: string | null = null;
     try {
@@ -111,6 +111,19 @@ export const searchLeads = createServerFn({ method: "POST" })
           },
           { onConflict: "id" }
         );
+
+        // Fetch plan status to determine search limits dynamically
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("plan")
+          .eq("id", userId)
+          .single();
+
+        if (profile?.plan === "pro") {
+          limit = 20;
+        } else if (profile?.plan === "basic") {
+          limit = 10;
+        }
       }
     } catch (_) {
       // Auth is optional for the search itself; continue gracefully
@@ -122,7 +135,7 @@ export const searchLeads = createServerFn({ method: "POST" })
       language: "en",
       locationQuery: data.city,
       maxCompetitorsToAnalyze: 0,
-      maxCrawledPlacesPerSearch: 3,
+      maxCrawledPlacesPerSearch: limit,
       maxReviews: 3,
       maximumLeadsEnrichmentRecords: 0,
       reviewsSort: "newest",

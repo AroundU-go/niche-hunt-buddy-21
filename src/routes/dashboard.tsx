@@ -171,7 +171,7 @@ function DashboardSearch() {
 
   const mutation = useMutation({
     mutationFn: async (vars: { city: string; niche: string }) =>
-      runSearch({ data: { city: vars.city, niche: vars.niche, limit: 3 } }),
+      runSearch({ data: { city: vars.city, niche: vars.niche } }),
     onSuccess: (data) => {
       setResults(data.leads);
       setMeta({ city: data.city, niche: data.niche });

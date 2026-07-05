@@ -10,7 +10,7 @@ import {
   ChevronRight,
   X as XIcon,
 } from "lucide-react";
-import { useAuth, SignInButton, UserButton } from "@clerk/tanstack-react-start";
+import { useAuth, SignInButton, UserButton, useUser } from "@clerk/tanstack-react-start";
 import { auth } from "@clerk/tanstack-react-start/server";
 
 const GlobeLeads = lazy(() => import("@/components/GlobeLeads"));
@@ -51,6 +51,17 @@ export const Route = createFileRoute("/")({
 function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isLoaded, isSignedIn } = useAuth();
+  const { user } = useUser();
+
+  const userEmail = user?.primaryEmailAddress?.emailAddress;
+
+  const basicCheckoutUrl = userEmail
+    ? `https://checkout.dodopayments.com/buy/pdt_0NiVJmJzctfUNFC2qgT1k?quantity=1&email=${encodeURIComponent(userEmail)}`
+    : "https://checkout.dodopayments.com/buy/pdt_0NiVJmJzctfUNFC2qgT1k?quantity=1";
+
+  const proCheckoutUrl = userEmail
+    ? `https://checkout.dodopayments.com/buy/pdt_0NiVK2h79kd3euwcFhI9z?quantity=1&email=${encodeURIComponent(userEmail)}`
+    : "https://checkout.dodopayments.com/buy/pdt_0NiVK2h79kd3euwcFhI9z?quantity=1";
 
   return (
     <div className="min-h-screen bg-background text-foreground" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
@@ -635,7 +646,7 @@ function LandingPage() {
           {/* Starter Plan */}
           <div className="pricing-card">
             <p style={{ fontSize: "0.85rem", fontWeight: 600, color: "oklch(0.5 0.02 250)", textTransform: "uppercase" as const, letterSpacing: "0.05em", marginBottom: 8 }}>
-              Starter
+              Basic
             </p>
             <div style={{ marginBottom: 24 }}>
               <span style={{ fontSize: "3rem", fontWeight: 800, color: "oklch(0.12 0.02 250)" }}>$9</span>
@@ -651,7 +662,7 @@ function LandingPage() {
               <PricingItem included={false} label="Ready to send emails" />
             </ul>
             <a
-              href="#"
+              href={basicCheckoutUrl}
               className="btn-outline"
               style={{
                 width: "100%",
@@ -682,10 +693,10 @@ function LandingPage() {
               Most Popular
             </div>
             <p style={{ fontSize: "0.85rem", fontWeight: 600, color: "oklch(0.5 0.02 250)", textTransform: "uppercase" as const, letterSpacing: "0.05em", marginBottom: 8 }}>
-              Basic
+              Pro
             </p>
             <div style={{ marginBottom: 24 }}>
-              <span style={{ fontSize: "3rem", fontWeight: 800, color: "oklch(0.12 0.02 250)" }}>$49</span>
+              <span style={{ fontSize: "3rem", fontWeight: 800, color: "oklch(0.12 0.02 250)" }}>$29</span>
               <span style={{ fontSize: "1rem", color: "oklch(0.5 0.02 250)" }}>/mo</span>
             </div>
             <ul className="pricing-feature-list">
@@ -698,7 +709,7 @@ function LandingPage() {
               <PricingItem included label="Ready to send emails" />
             </ul>
             <a
-              href="#"
+              href={proCheckoutUrl}
               className="btn-primary"
               style={{
                 width: "100%",
@@ -707,7 +718,7 @@ function LandingPage() {
                 padding: "12px 20px",
               }}
             >
-              Start Free Trial
+              Get Pro
               <ChevronRight style={{ width: 16, height: 16 }} />
             </a>
           </div>
