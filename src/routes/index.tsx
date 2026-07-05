@@ -14,7 +14,6 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useAuth, SignInButton, UserButton, useUser } from "@clerk/tanstack-react-start";
-import { auth } from "@clerk/tanstack-react-start/server";
 
 const GlobeLeads = lazy(() => import("@/components/GlobeLeads"));
 

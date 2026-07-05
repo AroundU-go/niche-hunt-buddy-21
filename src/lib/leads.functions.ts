@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { redirect } from "@tanstack/react-router";
 import { auth, clerkClient } from "@clerk/tanstack-react-start/server";
 import { supabase, getSupabaseClient } from "./supabase";
 
@@ -310,4 +311,26 @@ export const getUserPlan = createServerFn({ method: "GET" })
       console.error("Fatal error in getUserPlan server function:", err);
       return { plan: null, email: null, error: err.message || String(err) };
     }
+  });
+
+/* ────────────────────────────
+ *  ROUTE GUARDS (AUTH CHECKS)
+ * ──────────────────────────── */
+
+export const requireAuth = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const { userId } = await auth();
+    if (!userId) {
+      throw redirect({ to: "/sign-in" });
+    }
+    return { userId };
+  });
+
+export const requireNoAuth = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const { userId } = await auth();
+    if (userId) {
+      throw redirect({ to: "/dashboard" });
+    }
+    return { userId: null };
   });

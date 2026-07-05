@@ -2,7 +2,6 @@ import { createFileRoute, redirect, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, useEffect } from "react";
-import { auth } from "@clerk/tanstack-react-start/server";
 import { UserButton } from "@clerk/tanstack-react-start";
 import {
   Crosshair,
@@ -18,7 +17,7 @@ import {
   History,
   Clock,
 } from "lucide-react";
-import { searchLeads, getSearchHistory, syncUserProfile, getUserPlan, type Lead, type SearchHistoryItem } from "@/lib/leads.functions";
+import { searchLeads, getSearchHistory, syncUserProfile, getUserPlan, requireAuth, type Lead, type SearchHistoryItem } from "@/lib/leads.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -42,12 +41,7 @@ export const Route = createFileRoute("/dashboard")({
       },
     ],
   }),
-  beforeLoad: async () => {
-    const { userId } = await auth();
-    if (!userId) {
-      throw redirect({ to: "/sign-in" });
-    }
-  },
+  beforeLoad: () => requireAuth(),
   component: DashboardPage,
 });
 
