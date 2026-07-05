@@ -55,7 +55,7 @@ export const syncUserProfile = createServerFn({ method: "POST" })
       return { synced: false };
     }
 
-    const user = await clerkClient.users.getUser(userId);
+    const user = await clerkClient().users.getUser(userId);
     const email = user.emailAddresses?.[0]?.emailAddress ?? "";
 
     const supabaseClient = await getSupabaseClient(getToken);
@@ -101,7 +101,7 @@ export const searchLeads = createServerFn({ method: "POST" })
       userId = authedId;
       if (userId) {
         supabaseClient = await getSupabaseClient(getToken);
-        const user = await clerkClient.users.getUser(userId);
+        const user = await clerkClient().users.getUser(userId);
         const email = user.emailAddresses?.[0]?.emailAddress ?? "";
         // Upsert profile in Supabase
         await supabaseClient.from("profiles").upsert(
