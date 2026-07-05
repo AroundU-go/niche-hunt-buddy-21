@@ -19,12 +19,6 @@ import { auth } from "@clerk/tanstack-react-start/server";
 const GlobeLeads = lazy(() => import("@/components/GlobeLeads"));
 
 export const Route = createFileRoute("/")({
-  beforeLoad: async () => {
-    const { userId } = await auth();
-    if (userId) {
-      throw redirect({ to: "/dashboard" });
-    }
-  },
   head: () => ({
     meta: [
       { title: "HuntX — Find Businesses That Need a Website" },
