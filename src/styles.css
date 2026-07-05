@@ -7,8 +7,7 @@
 /*
  * Design system definition.
  *
- * Light landing-page theme with green (oklch 0.86 0.22 130) accent.
- * The purple from the reference design is replaced with this green.
+ * Light landing-page theme with purple (#6d5df6) accent.
  */
 
 @theme inline {
@@ -56,42 +55,42 @@
 
 :root {
   --radius: 0.75rem;
-  /* HuntX: clean light theme with green accent */
-  --background: oklch(0.985 0.002 120);
+  /* HuntX: clean light theme with purple accent */
+  --background: oklch(0.985 0.002 284.1);
   --foreground: oklch(0.18 0.02 250);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.18 0.02 250);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.18 0.02 250);
-  --primary: oklch(0.55 0.2 145);
-  --primary-foreground: oklch(0.99 0.005 120);
-  --secondary: oklch(0.96 0.008 120);
+  --primary: oklch(0.62 0.24 284.1);
+  --primary-foreground: oklch(0.99 0.005 284.1);
+  --secondary: oklch(0.96 0.008 284.1);
   --secondary-foreground: oklch(0.28 0.03 250);
-  --muted: oklch(0.96 0.005 120);
+  --muted: oklch(0.96 0.005 284.1);
   --muted-foreground: oklch(0.5 0.02 250);
-  --accent: oklch(0.94 0.02 140);
+  --accent: oklch(0.94 0.02 284.1);
   --accent-foreground: oklch(0.22 0.03 250);
   --destructive: oklch(0.58 0.22 25);
   --destructive-foreground: oklch(0.98 0.01 100);
   --border: oklch(0.91 0.005 250);
   --input: oklch(0.91 0.005 250);
-  --ring: oklch(0.55 0.2 145);
-  --chart-1: oklch(0.55 0.2 145);
-  --chart-2: oklch(0.62 0.18 165);
+  --ring: oklch(0.62 0.24 284.1);
+  --chart-1: oklch(0.62 0.24 284.1);
+  --chart-2: oklch(0.68 0.18 310);
   --chart-3: oklch(0.65 0.2 60);
   --chart-4: oklch(0.6 0.22 25);
   --chart-5: oklch(0.55 0.15 200);
-  --sidebar: oklch(0.98 0.003 120);
+  --sidebar: oklch(0.98 0.003 284.1);
   --sidebar-foreground: oklch(0.18 0.02 250);
-  --sidebar-primary: oklch(0.55 0.2 145);
-  --sidebar-primary-foreground: oklch(0.99 0.005 120);
-  --sidebar-accent: oklch(0.94 0.02 140);
+  --sidebar-primary: oklch(0.62 0.24 284.1);
+  --sidebar-primary-foreground: oklch(0.99 0.005 284.1);
+  --sidebar-accent: oklch(0.94 0.02 284.1);
   --sidebar-accent-foreground: oklch(0.22 0.03 250);
   --sidebar-border: oklch(0.91 0.005 250);
-  --sidebar-ring: oklch(0.55 0.2 145);
+  --sidebar-ring: oklch(0.62 0.24 284.1);
 
-  --gradient-hunt: linear-gradient(135deg, oklch(0.55 0.2 145) 0%, oklch(0.48 0.18 165) 100%);
-  --glow-primary: 0 0 40px oklch(0.55 0.2 145 / 0.2);
+  --gradient-hunt: linear-gradient(135deg, oklch(0.62 0.24 284.1) 0%, oklch(0.52 0.22 310) 100%);
+  --glow-primary: 0 0 40px oklch(0.62 0.24 284.1 / 0.2);
   --shadow-card: 0 1px 3px oklch(0 0 0 / 0.06), 0 4px 16px oklch(0 0 0 / 0.04);
   --shadow-card-hover: 0 4px 24px oklch(0 0 0 / 0.08), 0 8px 32px oklch(0 0 0 / 0.04);
 }
@@ -189,7 +188,7 @@
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid oklch(0.55 0.2 145 / 0.3);
+  border: 2px solid oklch(0.62 0.24 284.1 / 0.3);
   flex-shrink: 0;
 }
 
@@ -198,7 +197,7 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: oklch(0.7 0.2 145);
+  background: oklch(0.7 0.24 284.1);
   border: 2px solid white;
   top: 10px;
   left: 48px;
@@ -230,7 +229,7 @@
 .lead-card-float .detail svg {
   width: 11px;
   height: 11px;
-  color: oklch(0.55 0.2 145);
+  color: oklch(0.62 0.24 284.1);
   flex-shrink: 0;
 }
 
@@ -295,14 +294,14 @@
 .feature-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-card-hover);
-  border-color: oklch(0.55 0.2 145 / 0.3);
+  border-color: oklch(0.62 0.24 284.1 / 0.3);
 }
 
 .feature-card .icon-wrap {
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: oklch(0.94 0.04 145);
+  background: oklch(0.94 0.04 284.1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -312,7 +311,7 @@
 .feature-card .icon-wrap svg {
   width: 22px;
   height: 22px;
-  color: oklch(0.45 0.18 145);
+  color: oklch(0.52 0.22 284.1);
 }
 
 /* Pricing cards */
@@ -332,8 +331,8 @@
 }
 
 .pricing-card.featured {
-  border-color: oklch(0.55 0.2 145 / 0.4);
-  box-shadow: 0 0 0 1px oklch(0.55 0.2 145 / 0.15), 0 4px 24px oklch(0.55 0.2 145 / 0.1);
+  border-color: oklch(0.62 0.24 284.1 / 0.4);
+  box-shadow: 0 0 0 1px oklch(0.62 0.24 284.1 / 0.15), 0 4px 24px oklch(0.62 0.24 284.1 / 0.1);
 }
 
 .pricing-card.featured::before {
@@ -367,7 +366,7 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: oklch(0.92 0.04 145);
+  background: oklch(0.92 0.04 284.1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -377,7 +376,7 @@
 .pricing-feature-list li .check svg {
   width: 12px;
   height: 12px;
-  color: oklch(0.45 0.18 145);
+  color: oklch(0.52 0.22 284.1);
 }
 
 .pricing-feature-list li.disabled {
@@ -408,12 +407,12 @@ html {
   align-items: center;
   gap: 8px;
   padding: 6px 16px;
-  background: oklch(0.94 0.04 145);
-  border: 1px solid oklch(0.55 0.2 145 / 0.15);
+  background: oklch(0.94 0.04 284.1);
+  border: 1px solid oklch(0.62 0.24 284.1 / 0.15);
   border-radius: 999px;
   font-size: 0.85rem;
   font-weight: 500;
-  color: oklch(0.35 0.15 145);
+  color: oklch(0.45 0.2 284.1);
 }
 
 .hero-badge svg {
@@ -433,7 +432,7 @@ html {
 .feature-pill svg {
   width: 16px;
   height: 16px;
-  color: oklch(0.55 0.2 145);
+  color: oklch(0.62 0.24 284.1);
 }
 
 /* CTA buttons */
@@ -455,7 +454,7 @@ html {
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 20px oklch(0.55 0.2 145 / 0.35);
+  box-shadow: 0 4px 20px oklch(0.62 0.24 284.1 / 0.35);
 }
 
 .btn-outline {
@@ -476,7 +475,7 @@ html {
 
 .btn-outline:hover {
   transform: translateY(-2px);
-  border-color: oklch(0.55 0.2 145 / 0.4);
+  border-color: oklch(0.62 0.24 284.1 / 0.4);
   box-shadow: 0 4px 16px oklch(0 0 0 / 0.06);
 }
 

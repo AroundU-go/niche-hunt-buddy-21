@@ -64,7 +64,7 @@ function DashboardPage() {
           top: 0,
           zIndex: 50,
           backdropFilter: "blur(16px)",
-          background: "oklch(0.985 0.002 120 / 0.85)",
+          background: "oklch(0.985 0.002 284.1 / 0.85)",
           borderBottom: "1px solid oklch(0 0 0 / 0.06)",
         }}
       >

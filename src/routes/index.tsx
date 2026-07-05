@@ -62,7 +62,7 @@ function LandingPage() {
           top: 0,
           zIndex: 50,
           backdropFilter: "blur(16px)",
-          background: "oklch(0.985 0.002 120 / 0.85)",
+          background: "oklch(0.985 0.002 284.1 / 0.85)",
           borderBottom: "1px solid oklch(0 0 0 / 0.06)",
         }}
       >
@@ -267,7 +267,7 @@ function LandingPage() {
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path
                 d="M8 1L9.5 6.5L15 8L9.5 9.5L8 15L6.5 9.5L1 8L6.5 6.5L8 1Z"
-                fill="oklch(0.55 0.2 145)"
+                fill="oklch(0.62 0.24 284.1)"
                 opacity="0.7"
               />
             </svg>
@@ -288,7 +288,7 @@ function LandingPage() {
             Find Businesses
             <br />
             That{" "}
-            <span style={{ color: "oklch(0.45 0.18 145)" }}>Need a Website.</span>
+            <span style={{ color: "oklch(0.52 0.22 284.1)" }}>Need a Website.</span>
           </h1>
 
           {/* Subtitle */}
@@ -339,13 +339,13 @@ function LandingPage() {
                   width: "100%",
                   aspectRatio: "1",
                   borderRadius: "50%",
-                  background: "oklch(0.96 0.005 120)",
+                  background: "oklch(0.96 0.005 284.1)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <Loader2 style={{ width: 40, height: 40, animation: "spin 1s linear infinite", color: "oklch(0.55 0.2 145)" }} />
+                <Loader2 style={{ width: 40, height: 40, animation: "spin 1s linear infinite", color: "oklch(0.62 0.24 284.1)" }} />
               </div>
             }
           >
@@ -393,7 +393,7 @@ function LandingPage() {
             style={{
               fontSize: "0.9rem",
               fontWeight: 600,
-              color: "oklch(0.45 0.18 145)",
+              color: "oklch(0.52 0.22 284.1)",
               marginBottom: 12,
               textTransform: "uppercase" as const,
               letterSpacing: "0.05em",
@@ -411,7 +411,7 @@ function LandingPage() {
             }}
           >
             Built to Help You{" "}
-            <span style={{ color: "oklch(0.45 0.18 145)" }}>Find, Reach & Close</span>
+            <span style={{ color: "oklch(0.52 0.22 284.1)" }}>Find, Reach & Close</span>
             <br />
             More Clients
           </h2>
@@ -477,7 +477,7 @@ function LandingPage() {
         id="how-it-works"
         className="landing-section"
         style={{
-          background: "oklch(0.97 0.003 120)",
+          background: "oklch(0.97 0.003 284.1)",
           padding: "5rem 24px",
         }}
       >
@@ -487,7 +487,7 @@ function LandingPage() {
               style={{
                 fontSize: "0.9rem",
                 fontWeight: 600,
-                color: "oklch(0.45 0.18 145)",
+                color: "oklch(0.52 0.22 284.1)",
                 marginBottom: 12,
                 textTransform: "uppercase" as const,
                 letterSpacing: "0.05em",
@@ -599,7 +599,7 @@ function LandingPage() {
             style={{
               fontSize: "0.9rem",
               fontWeight: 600,
-              color: "oklch(0.45 0.18 145)",
+              color: "oklch(0.52 0.22 284.1)",
               marginBottom: 12,
               textTransform: "uppercase" as const,
               letterSpacing: "0.05em",
@@ -671,8 +671,8 @@ function LandingPage() {
                 position: "absolute",
                 top: 16,
                 right: 16,
-                background: "oklch(0.92 0.04 145)",
-                color: "oklch(0.35 0.15 145)",
+                background: "oklch(0.92 0.04 284.1)",
+                color: "oklch(0.45 0.2 284.1)",
                 fontSize: "0.75rem",
                 fontWeight: 700,
                 padding: "4px 12px",
@@ -746,7 +746,7 @@ function LandingPage() {
             gap: 8,
             padding: "14px 32px",
             background: "white",
-            color: "oklch(0.35 0.15 145)",
+            color: "oklch(0.45 0.2 284.1)",
             borderRadius: 12,
             fontWeight: 700,
             fontSize: "1rem",
@@ -772,7 +772,7 @@ function LandingPage() {
         style={{
           borderTop: "1px solid oklch(0 0 0 / 0.06)",
           padding: "3rem 24px 2rem",
-          background: "oklch(0.985 0.002 120)",
+          background: "oklch(0.985 0.002 284.1)",
         }}
       >
         <div

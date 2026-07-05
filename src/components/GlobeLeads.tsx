@@ -187,7 +187,7 @@ export function GlobeLeads({
       mapSamples: 20000,
       mapBrightness: 4.5,
       baseColor: [0.92, 0.92, 0.95],
-      markerColor: [0.33, 0.6, 0.33],
+      markerColor: [0.43, 0.36, 0.96],
       glowColor: [0.9, 0.92, 0.95],
       markers: markerLocations,
       onRender: (state) => {
