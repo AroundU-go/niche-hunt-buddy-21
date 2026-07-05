@@ -350,7 +350,7 @@ function LandingPage() {
           </p>
 
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 36 }}>
-            <Link to={isLoaded && isSignedIn ? "/dashboard" : "/sign-in"} className="btn-primary">
+            <Link to={isLoaded && isSignedIn ? "/dashboard" : "/sign-up"} className="btn-primary">
               Find businesses
               <ChevronRight style={{ width: 18, height: 18 }} />
             </Link>
@@ -910,8 +910,7 @@ function LandingPage() {
           Join 100+ agencies already using HuntX to find and close more web design deals.
         </p>
         <Link
-          to={isLoaded && isSignedIn ? "/dashboard" : "/"}
-          hash={isLoaded && isSignedIn ? undefined : "pricing"}
+          to={isLoaded && isSignedIn ? "/dashboard" : "/sign-up"}
           style={{
             display: "inline-flex",
             alignItems: "center",
