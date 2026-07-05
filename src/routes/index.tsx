@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useState, lazy, Suspense } from "react";
 import {
   Crosshair,
@@ -19,12 +19,6 @@ import { auth } from "@clerk/tanstack-react-start/server";
 const GlobeLeads = lazy(() => import("@/components/GlobeLeads"));
 
 export const Route = createFileRoute("/")({
-  beforeLoad: async () => {
-    const { userId } = await auth();
-    if (userId) {
-      throw redirect({ to: "/dashboard" });
-    }
-  },
   head: () => ({
     meta: [
       { title: "HuntX — Find Businesses That Need a Website" },
@@ -55,6 +49,7 @@ function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isLoaded, isSignedIn } = useAuth();
   const { user } = useUser();
+  const navigate = useNavigate();
 
   const userEmail = user?.primaryEmailAddress?.emailAddress;
 
@@ -65,6 +60,13 @@ function LandingPage() {
   const proCheckoutUrl = userEmail
     ? `https://checkout.dodopayments.com/buy/pdt_0NiVK2h79kd3euwcFhI9z?quantity=1&email=${encodeURIComponent(userEmail)}`
     : "https://checkout.dodopayments.com/buy/pdt_0NiVK2h79kd3euwcFhI9z?quantity=1";
+
+  const handlePaymentClick = (e: React.MouseEvent<HTMLAnchorElement>, checkoutUrl: string) => {
+    if (!isSignedIn) {
+      e.preventDefault();
+      navigate({ to: "/sign-in" });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
@@ -127,23 +129,27 @@ function LandingPage() {
             }}
             className="desktop-nav"
           >
-            {["Features", "How It Works", "Pricing"].map((item) => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase().replace(/\s+/g, "-")}`}
-                style={{
-                  fontSize: "0.9rem",
-                  fontWeight: 500,
-                  color: "oklch(0.4 0.02 250)",
-                  textDecoration: "none",
-                  transition: "color 0.15s",
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "oklch(0.18 0.02 250)")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "oklch(0.4 0.02 250)")}
-              >
-                {item}
-              </a>
-            ))}
+            {["Features", "How It Works", "Pricing"].map((item) => {
+              const targetId = item.toLowerCase().replace(/\s+/g, "-");
+              return (
+                <Link
+                  key={item}
+                  to="/"
+                  hash={targetId}
+                  style={{
+                    fontSize: "0.9rem",
+                    fontWeight: 500,
+                    color: "oklch(0.4 0.02 250)",
+                    textDecoration: "none",
+                    transition: "color 0.15s",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "oklch(0.18 0.02 250)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "oklch(0.4 0.02 250)")}
+                >
+                  {item}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Desktop CTA */}
@@ -170,11 +176,10 @@ function LandingPage() {
               <>
                 <Link
                   to="/dashboard"
+                  className="btn-primary"
                   style={{
-                    fontSize: "0.9rem",
-                    fontWeight: 500,
-                    color: "oklch(0.3 0.02 250)",
-                    textDecoration: "none",
+                    padding: "10px 22px",
+                    fontSize: "0.85rem",
                   }}
                 >
                   Dashboard
@@ -218,22 +223,26 @@ function LandingPage() {
               gap: 12,
             }}
           >
-            {["Features", "How It Works", "Pricing"].map((item) => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase().replace(/\s+/g, "-")}`}
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: 500,
-                  color: "oklch(0.3 0.02 250)",
-                  textDecoration: "none",
-                  padding: "8px 0",
-                }}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {item}
-              </a>
-            ))}
+            {["Features", "How It Works", "Pricing"].map((item) => {
+              const targetId = item.toLowerCase().replace(/\s+/g, "-");
+              return (
+                <Link
+                  key={item}
+                  to="/"
+                  hash={targetId}
+                  style={{
+                    fontSize: "1rem",
+                    fontWeight: 500,
+                    color: "oklch(0.3 0.02 250)",
+                    textDecoration: "none",
+                    padding: "8px 0",
+                  }}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item}
+                </Link>
+              );
+            })}
             <div style={{ display: "flex", gap: 12, marginTop: 8, alignItems: "center" }}>
               {isLoaded && !isSignedIn && (
                 <>
@@ -261,7 +270,18 @@ function LandingPage() {
                 </>
               )}
               {isLoaded && isSignedIn && (
-                <Link to="/dashboard" style={{ fontSize: "0.9rem", fontWeight: 500, color: "oklch(0.3 0.02 250)", textDecoration: "none", padding: "10px 0" }}>
+                <Link
+                  to="/dashboard"
+                  className="btn-primary"
+                  style={{
+                    padding: "10px 22px",
+                    fontSize: "0.85rem",
+                    width: "100%",
+                    textAlign: "center",
+                    justifyContent: "center",
+                  }}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
                   Dashboard
                 </Link>
               )}
@@ -802,6 +822,7 @@ function LandingPage() {
             </ul>
             <a
               href={basicCheckoutUrl}
+              onClick={(e) => handlePaymentClick(e, basicCheckoutUrl)}
               className="btn-outline"
               style={{
                 width: "100%",
@@ -835,7 +856,7 @@ function LandingPage() {
               Pro
             </p>
             <div style={{ marginBottom: 24 }}>
-              <span style={{ fontSize: "3rem", fontWeight: 800, color: "oklch(0.12 0.02 250)" }}>$29</span>
+              <span style={{ fontSize: "3rem", fontWeight: 800, color: "oklch(0.12 0.02 250)" }}>$49</span>
               <span style={{ fontSize: "1rem", color: "oklch(0.5 0.02 250)" }}>/mo</span>
             </div>
             <ul className="pricing-feature-list">
@@ -845,10 +866,10 @@ function LandingPage() {
               <PricingItem included label="Prioritized lead scoring" />
               <PricingItem included label="Email addresses" />
               <PricingItem included label="CSV export" />
-              <PricingItem included label="Ready to send emails" />
             </ul>
             <a
               href={proCheckoutUrl}
+              onClick={(e) => handlePaymentClick(e, proCheckoutUrl)}
               className="btn-primary"
               style={{
                 width: "100%",
@@ -888,8 +909,9 @@ function LandingPage() {
         <p style={{ fontSize: "1.05rem", color: "oklch(1 0 0 / 0.8)", marginBottom: 28, maxWidth: 480, margin: "0 auto 28px" }}>
           Join 100+ agencies already using HuntX to find and close more web design deals.
         </p>
-        <a
-          href="#pricing"
+        <Link
+          to={isLoaded && isSignedIn ? "/dashboard" : "/"}
+          hash={isLoaded && isSignedIn ? undefined : "pricing"}
           style={{
             display: "inline-flex",
             alignItems: "center",
@@ -912,9 +934,9 @@ function LandingPage() {
             e.currentTarget.style.boxShadow = "none";
           }}
         >
-          Start Free Trial
+          {isLoaded && isSignedIn ? "Go to Dashboard" : "Start Free Trial"}
           <ChevronRight style={{ width: 18, height: 18 }} />
-        </a>
+        </Link>
       </section>
 
       {/* ===== FOOTER ===== */}
@@ -979,11 +1001,30 @@ function LandingPage() {
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {col.links.map((link) => {
                   const isSection = ["Features", "Pricing", "How It Works"].includes(link);
-                  const href = isSection ? `#${link.toLowerCase().replace(/\s+/g, "-")}` : "#";
+                  const targetId = link.toLowerCase().replace(/\s+/g, "-");
+                  if (isSection) {
+                    return (
+                      <Link
+                        key={link}
+                        to="/"
+                        hash={targetId}
+                        style={{
+                          fontSize: "0.85rem",
+                          color: "oklch(0.5 0.02 250)",
+                          textDecoration: "none",
+                          transition: "color 0.15s",
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.color = "oklch(0.25 0.02 250)")}
+                        onMouseLeave={(e) => (e.currentTarget.style.color = "oklch(0.5 0.02 250)")}
+                      >
+                        {link}
+                      </Link>
+                    );
+                  }
                   return (
                     <a
                       key={link}
-                      href={href}
+                      href="#"
                       style={{
                         fontSize: "0.85rem",
                         color: "oklch(0.5 0.02 250)",

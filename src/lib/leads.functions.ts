@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { auth, clerkClient } from "@clerk/tanstack-react-start/server";
-import { supabase } from "./supabase";
+import { supabase, getSupabaseClient } from "./supabase";
 
 export type Lead = {
   placeId: string;
@@ -50,15 +50,16 @@ function computeLeadScore(item: {
 
 export const syncUserProfile = createServerFn({ method: "POST" })
   .handler(async () => {
-    const { userId } = await auth();
+    const { userId, getToken } = await auth();
     if (!userId) {
       return { synced: false };
     }
 
-    const user = await clerkClient.users.getUser(userId);
+    const user = await clerkClient().users.getUser(userId);
     const email = user.emailAddresses?.[0]?.emailAddress ?? "";
 
-    const { error } = await supabase.from("profiles").upsert(
+    const supabaseClient = await getSupabaseClient(getToken);
+    const { error } = await supabaseClient.from("profiles").upsert(
       {
         id: userId,
         email,
@@ -71,7 +72,7 @@ export const syncUserProfile = createServerFn({ method: "POST" })
 
     if (error) {
       console.error("Supabase profile sync error:", error.message);
-      return { synced: false };
+      return { synced: false, error: error.message };
     }
 
     return { synced: true };
@@ -92,16 +93,18 @@ export const searchLeads = createServerFn({ method: "POST" })
     if (!token) throw new Error("APIFY_TOKEN not configured");
 
     let limit = 3;
-    // --- Clerk: get authenticated user ---
     let userId: string | null = null;
+    let supabaseClient = supabase;
+    let hasAccess = true;
     try {
-      const authObj = await auth();
-      userId = authObj.userId;
+      const { userId: authedId, getToken } = await auth();
+      userId = authedId;
       if (userId) {
-        const user = await clerkClient.users.getUser(userId);
+        supabaseClient = await getSupabaseClient(getToken);
+        const user = await clerkClient().users.getUser(userId);
         const email = user.emailAddresses?.[0]?.emailAddress ?? "";
         // Upsert profile in Supabase
-        await supabase.from("profiles").upsert(
+        await supabaseClient.from("profiles").upsert(
           {
             id: userId,
             email,
@@ -113,13 +116,16 @@ export const searchLeads = createServerFn({ method: "POST" })
         );
 
         // Fetch plan status to determine search limits dynamically
-        const { data: profile } = await supabase
+        const { data: profile } = await supabaseClient
           .from("profiles")
           .select("plan")
           .eq("id", userId)
           .single();
 
-        if (profile?.plan === "pro") {
+        const isAdmin = email === "uddimakesit@gmail.com";
+        hasAccess = isAdmin || profile?.plan === "pro" || profile?.plan === "basic";
+
+        if (isAdmin || profile?.plan === "pro") {
           limit = 20;
         } else if (profile?.plan === "basic") {
           limit = 10;
@@ -127,6 +133,10 @@ export const searchLeads = createServerFn({ method: "POST" })
       }
     } catch (_) {
       // Auth is optional for the search itself; continue gracefully
+    }
+
+    if (userId && !hasAccess) {
+      throw new Error("subscription_required");
     }
 
     const input = {
@@ -210,7 +220,7 @@ export const searchLeads = createServerFn({ method: "POST" })
 
     // --- Log search to Supabase ---
     if (userId) {
-      await supabase.from("searches").insert({
+      await supabaseClient.from("searches").insert({
         user_id: userId,
         city: data.city,
         niche: data.niche,
@@ -237,12 +247,13 @@ export type SearchHistoryItem = {
 
 export const getSearchHistory = createServerFn({ method: "GET" })
   .handler(async () => {
-    const { userId } = await auth();
+    const { userId, getToken } = await auth();
     if (!userId) {
       return { history: [] as SearchHistoryItem[] };
     }
 
-    const { data, error } = await supabase
+    const supabaseClient = await getSupabaseClient(getToken);
+    const { data, error } = await supabaseClient
       .from("searches")
       .select("id, city, niche, results, created_at")
       .eq("user_id", userId)
@@ -255,4 +266,33 @@ export const getSearchHistory = createServerFn({ method: "GET" })
     }
 
     return { history: (data ?? []) as SearchHistoryItem[] };
+  });
+
+/* ────────────────────────────
+ *  GET USER PLAN STATUS
+ * ──────────────────────────── */
+
+export const getUserPlan = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const { userId, getToken } = await auth();
+    if (!userId) {
+      return { plan: null, email: null };
+    }
+
+    const user = await clerkClient().users.getUser(userId);
+    const email = user.emailAddresses?.[0]?.emailAddress ?? "";
+
+    const supabaseClient = await getSupabaseClient(getToken);
+    const { data: profile, error } = await supabaseClient
+      .from("profiles")
+      .select("plan")
+      .eq("id", userId)
+      .single();
+
+    if (error) {
+      console.error("Error fetching user plan:", error.message);
+      return { plan: null, email };
+    }
+
+    return { plan: profile?.plan ?? null, email };
   });

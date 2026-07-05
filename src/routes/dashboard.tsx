@@ -18,12 +18,19 @@ import {
   History,
   Clock,
 } from "lucide-react";
-import { searchLeads, getSearchHistory, syncUserProfile, type Lead, type SearchHistoryItem } from "@/lib/leads.functions";
+import { searchLeads, getSearchHistory, syncUserProfile, getUserPlan, type Lead, type SearchHistoryItem } from "@/lib/leads.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -49,7 +56,17 @@ function DashboardPage() {
 
   // Sync user profile to Supabase on dashboard load
   useEffect(() => {
-    runSyncProfile().catch(() => {});
+    runSyncProfile()
+      .then((res) => {
+        if (res && !res.synced && "error" in res) {
+          toast.error(`Database Profile Sync failed: ${res.error}`);
+        } else if (res && res.synced) {
+          console.log("Database Profile Synced successfully.");
+        }
+      })
+      .catch((err) => {
+        toast.error(`Profile Sync connection error: ${err.message || err}`);
+      });
   }, []);
 
   return (
@@ -156,9 +173,11 @@ function DashboardSearch() {
   const [niche, setNiche] = useState("");
   const [results, setResults] = useState<Lead[]>([]);
   const [meta, setMeta] = useState<{ city: string; niche: string } | null>(null);
+  const [pricingModalOpen, setPricingModalOpen] = useState(false);
 
   const runSearch = useServerFn(searchLeads);
   const runGetHistory = useServerFn(getSearchHistory);
+  const runGetUserPlan = useServerFn(getUserPlan);
   const queryClient = useQueryClient();
 
   // Fetch search history
@@ -167,7 +186,25 @@ function DashboardSearch() {
     queryFn: () => runGetHistory(),
   });
 
+  // Fetch user plan status
+  const planQuery = useQuery({
+    queryKey: ["userPlan"],
+    queryFn: () => runGetUserPlan(),
+  });
+
   const historyItems: SearchHistoryItem[] = historyQuery.data?.history ?? [];
+  const userPlan = planQuery.data?.plan ?? null;
+  const userEmail = planQuery.data?.email ?? "";
+  const isAdmin = userEmail === "uddimakesit@gmail.com";
+  const hasAccess = isAdmin || userPlan === "pro" || userPlan === "basic";
+
+  const basicCheckoutUrl = userEmail
+    ? `https://checkout.dodopayments.com/buy/pdt_0NiVJmJzctfUNFC2qgT1k?quantity=1&email=${encodeURIComponent(userEmail)}`
+    : "https://checkout.dodopayments.com/buy/pdt_0NiVJmJzctfUNFC2qgT1k?quantity=1";
+
+  const proCheckoutUrl = userEmail
+    ? `https://checkout.dodopayments.com/buy/pdt_0NiVK2h79kd3euwcFhI9z?quantity=1&email=${encodeURIComponent(userEmail)}`
+    : "https://checkout.dodopayments.com/buy/pdt_0NiVK2h79kd3euwcFhI9z?quantity=1";
 
   const mutation = useMutation({
     mutationFn: async (vars: { city: string; niche: string }) =>
@@ -184,7 +221,11 @@ function DashboardSearch() {
       }
     },
     onError: (err: Error) => {
-      toast.error(err.message || "Search failed");
+      if (err.message?.includes("subscription_required")) {
+        setPricingModalOpen(true);
+      } else {
+        toast.error(err.message || "Search failed");
+      }
     },
   });
 
@@ -199,6 +240,12 @@ function DashboardSearch() {
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!city.trim() || !niche.trim()) return;
+
+    if (!hasAccess) {
+      setPricingModalOpen(true);
+      return;
+    }
+
     mutation.mutate({ city: city.trim(), niche: niche.trim() });
   };
 
@@ -363,7 +410,136 @@ function DashboardSearch() {
           )}
         </Card>
       </div>
+
+      {/* Pricing Modal for subscription enforcement */}
+      <Dialog open={pricingModalOpen} onOpenChange={setPricingModalOpen}>
+        <DialogContent className="max-w-4xl p-6 bg-background border border-border sm:rounded-xl">
+          <DialogHeader className="text-center">
+            <DialogTitle className="text-2xl font-extrabold tracking-tight text-foreground">
+              Choose a Subscription Plan
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground text-sm mt-1">
+              Every email other than admin must have an active subscription to search leads.
+            </DialogDescription>
+          </DialogHeader>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+              gap: 20,
+              marginTop: 20,
+            }}
+          >
+            {/* Basic Plan */}
+            <div className="pricing-card" style={{ padding: "24px", minHeight: "auto" }}>
+              <p style={{ fontSize: "0.85rem", fontWeight: 600, color: "oklch(0.5 0.02 250)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>
+                Basic
+              </p>
+              <div style={{ marginBottom: 16 }}>
+                <span style={{ fontSize: "2.5rem", fontWeight: 800, color: "oklch(0.12 0.02 250)" }}>$9</span>
+                <span style={{ fontSize: "1rem", color: "oklch(0.5 0.02 250)" }}>/mo</span>
+              </div>
+              <ul className="pricing-feature-list" style={{ gap: 8, fontSize: "0.85rem" }}>
+                <PricingItem included label="100 leads per month" />
+                <PricingItem included label="Save to library" />
+                <PricingItem included label="Phone numbers" />
+                <PricingItem included label="Prioritized lead scoring" />
+                <PricingItem included={false} label="Email addresses" />
+                <PricingItem included={false} label="CSV export" />
+                <PricingItem included={false} label="Ready to send emails" />
+              </ul>
+              <a
+                href={basicCheckoutUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-outline"
+                style={{
+                  width: "100%",
+                  justifyContent: "center",
+                  marginTop: 20,
+                  padding: "10px 16px",
+                  textDecoration: "none",
+                }}
+              >
+                Get Started
+              </a>
+            </div>
+
+            {/* Pro Plan */}
+            <div className="pricing-card featured" style={{ padding: "24px", minHeight: "auto" }}>
+              <div
+                style={{
+                  position: "absolute",
+                  top: 12,
+                  right: 12,
+                  background: "oklch(0.92 0.04 284.1)",
+                  color: "oklch(0.45 0.2 284.1)",
+                  fontSize: "0.7rem",
+                  fontWeight: 700,
+                  padding: "2px 10px",
+                  borderRadius: 999,
+                }}
+              >
+                Most Popular
+              </div>
+              <p style={{ fontSize: "0.85rem", fontWeight: 600, color: "oklch(0.5 0.02 250)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>
+                Pro
+              </p>
+              <div style={{ marginBottom: 16 }}>
+                <span style={{ fontSize: "2.5rem", fontWeight: 800, color: "oklch(0.12 0.02 250)" }}>$49</span>
+                <span style={{ fontSize: "1rem", color: "oklch(0.5 0.02 250)" }}>/mo</span>
+              </div>
+              <ul className="pricing-feature-list" style={{ gap: 8, fontSize: "0.85rem" }}>
+                <PricingItem included label="1,000 leads per month" />
+                <PricingItem included label="Save to library" />
+                <PricingItem included label="Phone numbers" />
+                <PricingItem included label="Prioritized lead scoring" />
+                <PricingItem included label="Email addresses" />
+                <PricingItem included label="CSV export" />
+              </ul>
+              <a
+                href={proCheckoutUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary"
+                style={{
+                  width: "100%",
+                  justifyContent: "center",
+                  marginTop: 20,
+                  padding: "10px 16px",
+                  textDecoration: "none",
+                }}
+              >
+                Get Pro
+              </a>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
+  );
+}
+
+/* ────────────────────────────
+ *  PRICING ITEM HELPER
+ * ──────────────────────────── */
+
+function PricingItem({ included, label }: { included: boolean; label: string }) {
+  return (
+    <li className={included ? "" : "disabled"}>
+      <span className="check">
+        {included ? (
+          <svg viewBox="0 0 12 12" fill="none" style={{ width: 12, height: 12 }}>
+            <path d="M2.5 6L5 8.5L9.5 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 12 12" fill="none" style={{ width: 12, height: 12 }}>
+            <path d="M3 9L9 3M3 3L9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        )}
+      </span>
+      {label}
+    </li>
   );
 }
 
