@@ -49,7 +49,17 @@ function DashboardPage() {
 
   // Sync user profile to Supabase on dashboard load
   useEffect(() => {
-    runSyncProfile().catch(() => {});
+    runSyncProfile()
+      .then((res) => {
+        if (res && !res.synced && "error" in res) {
+          toast.error(`Database Profile Sync failed: ${res.error}`);
+        } else if (res && res.synced) {
+          console.log("Database Profile Synced successfully.");
+        }
+      })
+      .catch((err) => {
+        toast.error(`Profile Sync connection error: ${err.message || err}`);
+      });
   }, []);
 
   return (

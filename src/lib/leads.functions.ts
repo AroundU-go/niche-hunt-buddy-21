@@ -72,7 +72,7 @@ export const syncUserProfile = createServerFn({ method: "POST" })
 
     if (error) {
       console.error("Supabase profile sync error:", error.message);
-      return { synced: false };
+      return { synced: false, error: error.message };
     }
 
     return { synced: true };
