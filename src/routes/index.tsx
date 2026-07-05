@@ -138,14 +138,10 @@ function LandingPage() {
             {["Features", "How It Works", "Pricing"].map((item) => {
               const targetId = item.toLowerCase().replace(/\s+/g, "-");
               return (
-                <a
+                <Link
                   key={item}
-                  href={`#${targetId}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth" });
-                    window.history.pushState(null, "", `#${targetId}`);
-                  }}
+                  to="/"
+                  hash={targetId}
                   style={{
                     fontSize: "0.9rem",
                     fontWeight: 500,
@@ -157,7 +153,7 @@ function LandingPage() {
                   onMouseLeave={(e) => (e.currentTarget.style.color = "oklch(0.4 0.02 250)")}
                 >
                   {item}
-                </a>
+                </Link>
               );
             })}
           </nav>
@@ -236,9 +232,10 @@ function LandingPage() {
             {["Features", "How It Works", "Pricing"].map((item) => {
               const targetId = item.toLowerCase().replace(/\s+/g, "-");
               return (
-                <a
+                <Link
                   key={item}
-                  href={`#${targetId}`}
+                  to="/"
+                  hash={targetId}
                   style={{
                     fontSize: "1rem",
                     fontWeight: 500,
@@ -246,15 +243,10 @@ function LandingPage() {
                     textDecoration: "none",
                     padding: "8px 0",
                   }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setMobileMenuOpen(false);
-                    document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth" });
-                    window.history.pushState(null, "", `#${targetId}`);
-                  }}
+                  onClick={() => setMobileMenuOpen(false)}
                 >
                   {item}
-                </a>
+                </Link>
               );
             })}
             <div style={{ display: "flex", gap: 12, marginTop: 8, alignItems: "center" }}>
@@ -884,14 +876,8 @@ function LandingPage() {
           Join 100+ agencies already using HuntX to find and close more web design deals.
         </p>
         <Link
-          to={isLoaded && isSignedIn ? "/dashboard" : "#pricing"}
-          onClick={(e) => {
-            if (isLoaded && !isSignedIn) {
-              e.preventDefault();
-              document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
-              window.history.pushState(null, "", "#pricing");
-            }
-          }}
+          to={isLoaded && isSignedIn ? "/dashboard" : "/"}
+          hash={isLoaded && isSignedIn ? undefined : "pricing"}
           style={{
             display: "inline-flex",
             alignItems: "center",
@@ -982,18 +968,29 @@ function LandingPage() {
                 {col.links.map((link) => {
                   const isSection = ["Features", "Pricing", "How It Works"].includes(link);
                   const targetId = link.toLowerCase().replace(/\s+/g, "-");
-                  const href = isSection ? `#${targetId}` : "#";
+                  if (isSection) {
+                    return (
+                      <Link
+                        key={link}
+                        to="/"
+                        hash={targetId}
+                        style={{
+                          fontSize: "0.85rem",
+                          color: "oklch(0.5 0.02 250)",
+                          textDecoration: "none",
+                          transition: "color 0.15s",
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.color = "oklch(0.25 0.02 250)")}
+                        onMouseLeave={(e) => (e.currentTarget.style.color = "oklch(0.5 0.02 250)")}
+                      >
+                        {link}
+                      </Link>
+                    );
+                  }
                   return (
                     <a
                       key={link}
-                      href={href}
-                      onClick={(e) => {
-                        if (isSection) {
-                          e.preventDefault();
-                          document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth" });
-                          window.history.pushState(null, "", `#${targetId}`);
-                        }
-                      }}
+                      href="#"
                       style={{
                         fontSize: "0.85rem",
                         color: "oklch(0.5 0.02 250)",
