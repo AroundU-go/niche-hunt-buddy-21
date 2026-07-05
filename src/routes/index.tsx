@@ -825,7 +825,6 @@ function LandingPage() {
               <PricingItem included label="Prioritized lead scoring" />
               <PricingItem included label="Email addresses" />
               <PricingItem included label="CSV export" />
-              <PricingItem included label="Ready to send emails" />
             </ul>
             <a
               href={proCheckoutUrl}

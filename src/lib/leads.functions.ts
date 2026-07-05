@@ -93,9 +93,9 @@ export const searchLeads = createServerFn({ method: "POST" })
     if (!token) throw new Error("APIFY_TOKEN not configured");
 
     let limit = 3;
-    // --- Clerk: get authenticated user ---
     let userId: string | null = null;
     let supabaseClient = supabase;
+    let hasAccess = true;
     try {
       const { userId: authedId, getToken } = await auth();
       userId = authedId;
@@ -122,7 +122,10 @@ export const searchLeads = createServerFn({ method: "POST" })
           .eq("id", userId)
           .single();
 
-        if (profile?.plan === "pro") {
+        const isAdmin = email === "uddimakesit@gmail.com";
+        hasAccess = isAdmin || profile?.plan === "pro" || profile?.plan === "basic";
+
+        if (isAdmin || profile?.plan === "pro") {
           limit = 20;
         } else if (profile?.plan === "basic") {
           limit = 10;
@@ -130,6 +133,10 @@ export const searchLeads = createServerFn({ method: "POST" })
       }
     } catch (_) {
       // Auth is optional for the search itself; continue gracefully
+    }
+
+    if (userId && !hasAccess) {
+      throw new Error("subscription_required");
     }
 
     const input = {
@@ -259,4 +266,33 @@ export const getSearchHistory = createServerFn({ method: "GET" })
     }
 
     return { history: (data ?? []) as SearchHistoryItem[] };
+  });
+
+/* ────────────────────────────
+ *  GET USER PLAN STATUS
+ * ──────────────────────────── */
+
+export const getUserPlan = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const { userId, getToken } = await auth();
+    if (!userId) {
+      return { plan: null, email: null };
+    }
+
+    const user = await clerkClient().users.getUser(userId);
+    const email = user.emailAddresses?.[0]?.emailAddress ?? "";
+
+    const supabaseClient = await getSupabaseClient(getToken);
+    const { data: profile, error } = await supabaseClient
+      .from("profiles")
+      .select("plan")
+      .eq("id", userId)
+      .single();
+
+    if (error) {
+      console.error("Error fetching user plan:", error.message);
+      return { plan: null, email };
+    }
+
+    return { plan: profile?.plan ?? null, email };
   });
