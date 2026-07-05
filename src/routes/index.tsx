@@ -154,38 +154,8 @@ function LandingPage() {
 
           {/* Desktop CTA */}
           <div style={{ display: "flex", alignItems: "center", gap: 16 }} className="desktop-nav">
-            {isLoaded && !isSignedIn && (
-              <>
-                <Link
-                  to="/sign-in"
-                  style={{
-                    fontSize: "0.9rem",
-                    fontWeight: 500,
-                    color: "oklch(0.3 0.02 250)",
-                    textDecoration: "none",
-                  }}
-                >
-                  Log in
-                </Link>
-                <Link to="/sign-up" className="btn-primary" style={{ padding: "10px 22px", fontSize: "0.85rem" }}>
-                  Get Started
-                </Link>
-              </>
-            )}
             {isLoaded && isSignedIn && (
-              <>
-                <Link
-                  to="/dashboard"
-                  className="btn-primary"
-                  style={{
-                    padding: "10px 22px",
-                    fontSize: "0.85rem",
-                  }}
-                >
-                  Dashboard
-                </Link>
-                <UserButton afterSignOutUrl="/" />
-              </>
+              <UserButton afterSignOutUrl="/" />
             )}
           </div>
 
@@ -244,46 +214,8 @@ function LandingPage() {
               );
             })}
             <div style={{ display: "flex", gap: 12, marginTop: 8, alignItems: "center" }}>
-              {isLoaded && !isSignedIn && (
-                <>
-                  <Link
-                    to="/sign-in"
-                    style={{
-                      fontSize: "0.9rem",
-                      fontWeight: 500,
-                      color: "oklch(0.3 0.02 250)",
-                      textDecoration: "none",
-                      padding: "10px 0",
-                    }}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Log in
-                  </Link>
-                  <Link
-                    to="/sign-up"
-                    className="btn-primary"
-                    style={{ padding: "10px 22px", fontSize: "0.85rem" }}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Get Started
-                  </Link>
-                </>
-              )}
               {isLoaded && isSignedIn && (
-                <Link
-                  to="/dashboard"
-                  className="btn-primary"
-                  style={{
-                    padding: "10px 22px",
-                    fontSize: "0.85rem",
-                    width: "100%",
-                    textAlign: "center",
-                    justifyContent: "center",
-                  }}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Dashboard
-                </Link>
+                <UserButton afterSignOutUrl="/" />
               )}
             </div>
           </div>
@@ -350,7 +282,7 @@ function LandingPage() {
           </p>
 
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 36 }}>
-            <Link to={isLoaded && isSignedIn ? "/dashboard" : "/sign-up"} className="btn-primary">
+            <Link to={isLoaded && isSignedIn ? "/dashboard" : "/sign-in"} className="btn-primary">
               Find businesses
               <ChevronRight style={{ width: 18, height: 18 }} />
             </Link>
@@ -910,7 +842,7 @@ function LandingPage() {
           Join 100+ agencies already using HuntX to find and close more web design deals.
         </p>
         <Link
-          to={isLoaded && isSignedIn ? "/dashboard" : "/sign-up"}
+          to={isLoaded && isSignedIn ? "/dashboard" : "/sign-in"}
           style={{
             display: "inline-flex",
             alignItems: "center",
