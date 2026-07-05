@@ -9,6 +9,9 @@ import {
   Send,
   ChevronRight,
   X as XIcon,
+  Building2,
+  User,
+  Sparkles,
 } from "lucide-react";
 import { useAuth, SignInButton, UserButton, useUser } from "@clerk/tanstack-react-start";
 import { auth } from "@clerk/tanstack-react-start/server";
@@ -89,7 +92,7 @@ function LandingPage() {
           }}
         >
           {/* Logo */}
-          <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
+          <Link to="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
             <div
               style={{
                 width: 36,
@@ -113,7 +116,7 @@ function LandingPage() {
             >
               HuntX
             </span>
-          </a>
+          </Link>
 
           {/* Desktop Nav */}
           <nav
@@ -124,7 +127,7 @@ function LandingPage() {
             }}
             className="desktop-nav"
           >
-            {["Features", "How It Works", "Pricing", "Blog", "Resources"].map((item) => (
+            {["Features", "How It Works", "Pricing"].map((item) => (
               <a
                 key={item}
                 href={`#${item.toLowerCase().replace(/\s+/g, "-")}`}
@@ -147,20 +150,17 @@ function LandingPage() {
           <div style={{ display: "flex", alignItems: "center", gap: 16 }} className="desktop-nav">
             {isLoaded && !isSignedIn && (
               <>
-                <SignInButton mode="redirect">
-                  <button
-                    style={{
-                      fontSize: "0.9rem",
-                      fontWeight: 500,
-                      color: "oklch(0.3 0.02 250)",
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Log in
-                  </button>
-                </SignInButton>
+                <Link
+                  to="/sign-in"
+                  style={{
+                    fontSize: "0.9rem",
+                    fontWeight: 500,
+                    color: "oklch(0.3 0.02 250)",
+                    textDecoration: "none",
+                  }}
+                >
+                  Log in
+                </Link>
                 <Link to="/sign-up" className="btn-primary" style={{ padding: "10px 22px", fontSize: "0.85rem" }}>
                   Get Started
                 </Link>
@@ -218,7 +218,7 @@ function LandingPage() {
               gap: 12,
             }}
           >
-            {["Features", "How It Works", "Pricing", "Blog", "Resources"].map((item) => (
+            {["Features", "How It Works", "Pricing"].map((item) => (
               <a
                 key={item}
                 href={`#${item.toLowerCase().replace(/\s+/g, "-")}`}
@@ -234,15 +234,28 @@ function LandingPage() {
                 {item}
               </a>
             ))}
-            <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+            <div style={{ display: "flex", gap: 12, marginTop: 8, alignItems: "center" }}>
               {isLoaded && !isSignedIn && (
                 <>
-                  <SignInButton mode="redirect">
-                    <button style={{ fontSize: "0.9rem", fontWeight: 500, color: "oklch(0.3 0.02 250)", background: "none", border: "none", cursor: "pointer", padding: "10px 0" }}>
-                      Log in
-                    </button>
-                  </SignInButton>
-                  <Link to="/sign-up" className="btn-primary" style={{ padding: "10px 22px", fontSize: "0.85rem" }}>
+                  <Link
+                    to="/sign-in"
+                    style={{
+                      fontSize: "0.9rem",
+                      fontWeight: 500,
+                      color: "oklch(0.3 0.02 250)",
+                      textDecoration: "none",
+                      padding: "10px 0",
+                    }}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Log in
+                  </Link>
+                  <Link
+                    to="/sign-up"
+                    className="btn-primary"
+                    style={{ padding: "10px 22px", fontSize: "0.85rem" }}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
                     Get Started
                   </Link>
                 </>
@@ -316,9 +329,8 @@ function LandingPage() {
             don't have a website—so you can reach out first and close more deals.
           </p>
 
-          {/* CTA Button */}
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 36 }}>
-            <Link to="/dashboard" className="btn-primary">
+            <Link to={isLoaded && isSignedIn ? "/dashboard" : "/sign-in"} className="btn-primary">
               Find businesses
               <ChevronRight style={{ width: 18, height: 18 }} />
             </Link>
@@ -603,6 +615,92 @@ function LandingPage() {
         </div>
       </section>
 
+      {/* ===== WHO IS IT FOR ===== */}
+      <section
+        id="who-is-it-for"
+        className="landing-section"
+        style={{
+          maxWidth: 1200,
+          margin: "0 auto",
+          padding: "5rem 24px",
+        }}
+      >
+        <div style={{ textAlign: "center", marginBottom: 48 }}>
+          <p
+            style={{
+              fontSize: "0.9rem",
+              fontWeight: 600,
+              color: "oklch(0.52 0.22 284.1)",
+              marginBottom: 12,
+              textTransform: "uppercase" as const,
+              letterSpacing: "0.05em",
+            }}
+          >
+            Who Is It For
+          </p>
+          <h2
+            style={{
+              fontSize: "clamp(1.8rem, 3vw, 2.6rem)",
+              fontWeight: 800,
+              lineHeight: 1.15,
+              letterSpacing: "-0.02em",
+              color: "oklch(0.12 0.02 250)",
+            }}
+          >
+            Perfect Match for Web Professionals
+          </h2>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+            gap: 24,
+          }}
+        >
+          {[
+            {
+              icon: <Building2 />,
+              title: "Web Design Agencies",
+              desc: "Supercharge your pipeline. Find high-value local businesses that need professional redesigns, SEO, and full digital transformations.",
+            },
+            {
+              icon: <User />,
+              title: "Freelancers",
+              desc: "Stop hunting on job boards. Directly pitching businesses with custom offers gives you a higher response rate and bigger contract values.",
+            },
+            {
+              icon: <Sparkles />,
+              title: "AI Web Builders",
+              desc: "Automate custom page generation. Find clients, instantly generate initial design mockups with AI, and present ready-to-buy sites.",
+            },
+          ].map((target) => (
+            <div key={target.title} className="feature-card">
+              <div className="icon-wrap">{target.icon}</div>
+              <h3
+                style={{
+                  fontSize: "1.15rem",
+                  fontWeight: 700,
+                  color: "oklch(0.15 0.02 250)",
+                  marginBottom: 10,
+                }}
+              >
+                {target.title}
+              </h3>
+              <p
+                style={{
+                  fontSize: "0.9rem",
+                  lineHeight: 1.65,
+                  color: "oklch(0.45 0.02 250)",
+                }}
+              >
+                {target.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ===== PRICING ===== */}
       <section id="pricing" className="landing-section" style={{ maxWidth: 1200, margin: "0 auto", padding: "5rem 24px" }}>
         <div style={{ textAlign: "center", marginBottom: 48 }}>
@@ -838,22 +936,26 @@ function LandingPage() {
                 {col.title}
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {col.links.map((link) => (
-                  <a
-                    key={link}
-                    href="#"
-                    style={{
-                      fontSize: "0.85rem",
-                      color: "oklch(0.5 0.02 250)",
-                      textDecoration: "none",
-                      transition: "color 0.15s",
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = "oklch(0.25 0.02 250)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = "oklch(0.5 0.02 250)")}
-                  >
-                    {link}
-                  </a>
-                ))}
+                {col.links.map((link) => {
+                  const isSection = ["Features", "Pricing", "How It Works"].includes(link);
+                  const href = isSection ? `#${link.toLowerCase().replace(/\s+/g, "-")}` : "#";
+                  return (
+                    <a
+                      key={link}
+                      href={href}
+                      style={{
+                        fontSize: "0.85rem",
+                        color: "oklch(0.5 0.02 250)",
+                        textDecoration: "none",
+                        transition: "color 0.15s",
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.color = "oklch(0.25 0.02 250)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.color = "oklch(0.5 0.02 250)")}
+                    >
+                      {link}
+                    </a>
+                  );
+                })}
               </div>
             </div>
           ))}
