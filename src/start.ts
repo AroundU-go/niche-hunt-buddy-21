@@ -21,8 +21,7 @@ const errorMiddleware = createMiddleware().server(async ({ next }) => {
 export const startInstance = createStart(() => ({
   requestMiddleware: [
     clerkMiddleware({
-      publishableKey: import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || (typeof process !== "undefined" ? process.env.CLERK_PUBLISHABLE_KEY : undefined),
-      secretKey: (typeof process !== "undefined" ? process.env.CLERK_SECRET_KEY : undefined) || import.meta.env.CLERK_SECRET_KEY,
+      publishableKey: import.meta.env.VITE_CLERK_PUBLISHABLE_KEY,
     }),
     errorMiddleware,
   ],
