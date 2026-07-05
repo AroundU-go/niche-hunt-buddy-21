@@ -91,29 +91,33 @@ export const searchLeads = createServerFn({ method: "POST" })
     }
     const city = data.city.trim();
     const niche = data.niche.trim();
+    const limit = typeof data.limit === "number" ? Math.max(1, data.limit) : 10;
     if (!city || !niche) throw new Error("city and niche cannot be empty");
-    return { city, niche };
+    return { city, niche, limit };
   })
   .handler(async ({ data }) => {
     const token = process.env.APIFY_TOKEN;
     if (!token) throw new Error("APIFY_TOKEN not configured");
 
-    let limit = 3;
+    let limit = data.limit;
     let userId: string | null = null;
     let supabaseClient = supabase;
     let hasAccess = true;
+    let userPlan = "free";
+    let userEmail = "";
+
     try {
       const { userId: authedId, getToken } = await auth();
       userId = authedId;
       if (userId) {
         supabaseClient = await getSupabaseClient(getToken);
         const user = await clerkClient().users.getUser(userId);
-        const email = user.emailAddresses?.[0]?.emailAddress ?? "";
+        userEmail = user.emailAddresses?.[0]?.emailAddress ?? "";
         // Upsert profile in Supabase
         await supabaseClient.from("profiles").upsert(
           {
             id: userId,
-            email,
+            email: userEmail,
             first_name: user.firstName ?? null,
             last_name: user.lastName ?? null,
             last_login: new Date().toISOString(),
@@ -128,21 +132,50 @@ export const searchLeads = createServerFn({ method: "POST" })
           .eq("id", userId)
           .single();
 
-        const isAdmin = email === "uddimakesit@gmail.com";
-        hasAccess = isAdmin || profile?.plan === "pro" || profile?.plan === "basic";
+        userPlan = profile?.plan ?? "free";
+        const isAdmin = userEmail === "uddimakesit@gmail.com";
+        hasAccess = isAdmin || userPlan === "pro" || userPlan === "basic";
 
-        if (isAdmin || profile?.plan === "pro") {
-          limit = 20;
-        } else if (profile?.plan === "basic") {
-          limit = 10;
+        if (!isAdmin && hasAccess) {
+          // Check quota limits
+          const { data: searches } = await supabaseClient
+            .from("searches")
+            .select("results")
+            .eq("user_id", userId);
+
+          let extractedLeads = 0;
+          if (searches) {
+            extractedLeads = searches.reduce((acc, search) => {
+              const count = Array.isArray(search.results) ? search.results.length : 0;
+              return acc + count;
+            }, 0);
+          }
+
+          const planQuota = userPlan === "pro" ? 1500 : userPlan === "basic" ? 100 : 0;
+          if (extractedLeads >= planQuota) {
+            throw new Error("quota_exceeded");
+          }
+
+          const remaining = planQuota - extractedLeads;
+          if (limit > remaining) {
+            limit = remaining;
+          }
         }
       }
-    } catch (_) {
+    } catch (err: any) {
+      if (err.message === "quota_exceeded" || err.message === "subscription_required") {
+        throw err;
+      }
       // Auth is optional for the search itself; continue gracefully
     }
 
     if (userId && !hasAccess) {
       throw new Error("subscription_required");
+    }
+
+    if (!userId) {
+      // Unauthenticated users capped at 3
+      limit = Math.min(3, limit);
     }
 
     const input = {
@@ -288,7 +321,7 @@ export const getUserPlan = createServerFn({ method: "GET" })
     try {
       const { userId, getToken } = await auth();
       if (!userId) {
-        return { plan: null, email: null };
+        return { plan: null, email: null, extractedLeads: 0 };
       }
 
       const user = await clerkClient().users.getUser(userId);
@@ -303,13 +336,28 @@ export const getUserPlan = createServerFn({ method: "GET" })
 
       if (error) {
         console.error("Error fetching user plan:", error.message);
-        return { plan: null, email };
       }
 
-      return { plan: profile?.plan ?? null, email };
+      // Fetch total extracted leads
+      const { data: searches, error: searchesError } = await supabaseClient
+        .from("searches")
+        .select("results")
+        .eq("user_id", userId);
+
+      let extractedLeads = 0;
+      if (!searchesError && searches) {
+        extractedLeads = searches.reduce((acc, search) => {
+          const count = Array.isArray(search.results) ? search.results.length : 0;
+          return acc + count;
+        }, 0);
+      } else if (searchesError) {
+        console.error("Error fetching searches for quota:", searchesError.message);
+      }
+
+      return { plan: profile?.plan ?? null, email, extractedLeads };
     } catch (err: any) {
       console.error("Fatal error in getUserPlan server function:", err);
-      return { plan: null, email: null, error: err.message || String(err) };
+      return { plan: null, email: null, extractedLeads: 0, error: err.message || String(err) };
     }
   });
 

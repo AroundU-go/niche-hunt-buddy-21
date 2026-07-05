@@ -165,6 +165,7 @@ function DashboardPage() {
 function DashboardSearch() {
   const [city, setCity] = useState("");
   const [niche, setNiche] = useState("");
+  const [leadsLimit, setLeadsLimit] = useState("10");
   const [results, setResults] = useState<Lead[]>([]);
   const [meta, setMeta] = useState<{ city: string; niche: string } | null>(null);
   const [pricingModalOpen, setPricingModalOpen] = useState(false);
@@ -189,25 +190,30 @@ function DashboardSearch() {
   const historyItems: SearchHistoryItem[] = historyQuery.data?.history ?? [];
   const userPlan = planQuery.data?.plan ?? null;
   const userEmail = planQuery.data?.email ?? "";
+  const extractedLeads = planQuery.data?.extractedLeads ?? 0;
   const isAdmin = userEmail === "uddimakesit@gmail.com";
   const hasAccess = isAdmin || userPlan === "pro" || userPlan === "basic";
 
+  const quota = userPlan === "pro" ? 1500 : userPlan === "basic" ? 100 : 0;
+  const percentUsed = quota > 0 ? Math.min(100, Math.round((extractedLeads / quota) * 100)) : 0;
+
   const basicCheckoutUrl = userEmail
-    ? `https://checkout.dodopayments.com/buy/pdt_0NiVJmJzctfUNFC2qgT1k?quantity=1&email=${encodeURIComponent(userEmail)}`
+    ? `https://checkout.dodopayments.com/buy/pdt_0NiVJmJzctfUNFC2qgT1k?quantity=1&email=${encodeURIComponent(userEmail)}&disableEmail=true`
     : "https://checkout.dodopayments.com/buy/pdt_0NiVJmJzctfUNFC2qgT1k?quantity=1";
 
   const proCheckoutUrl = userEmail
-    ? `https://checkout.dodopayments.com/buy/pdt_0NiVK2h79kd3euwcFhI9z?quantity=1&email=${encodeURIComponent(userEmail)}`
+    ? `https://checkout.dodopayments.com/buy/pdt_0NiVK2h79kd3euwcFhI9z?quantity=1&email=${encodeURIComponent(userEmail)}&disableEmail=true`
     : "https://checkout.dodopayments.com/buy/pdt_0NiVK2h79kd3euwcFhI9z?quantity=1";
 
   const mutation = useMutation({
-    mutationFn: async (vars: { city: string; niche: string }) =>
-      runSearch({ data: { city: vars.city, niche: vars.niche } }),
+    mutationFn: async (vars: { city: string; niche: string; limit: number }) =>
+      runSearch({ data: { city: vars.city, niche: vars.niche, limit: vars.limit } }),
     onSuccess: (data) => {
       setResults(data.leads);
       setMeta({ city: data.city, niche: data.niche });
-      // Invalidate history so new search appears
+      // Invalidate history and userPlan so count updates
       queryClient.invalidateQueries({ queryKey: ["searchHistory"] });
+      queryClient.invalidateQueries({ queryKey: ["userPlan"] });
       if (data.leads.length === 0) {
         toast.info("No leads found. Try a broader city or different niche.");
       } else {
@@ -217,6 +223,8 @@ function DashboardSearch() {
     onError: (err: Error) => {
       if (err.message?.includes("subscription_required")) {
         setPricingModalOpen(true);
+      } else if (err.message?.includes("quota_exceeded")) {
+        toast.error("You have exceeded your plan's monthly leads quota.");
       } else {
         toast.error(err.message || "Search failed");
       }
@@ -240,7 +248,22 @@ function DashboardSearch() {
       return;
     }
 
-    mutation.mutate({ city: city.trim(), niche: niche.trim() });
+    const parsedLimit = parseInt(leadsLimit, 10);
+    const finalLimit = isNaN(parsedLimit) ? 10 : Math.max(1, parsedLimit);
+
+    if (!isAdmin) {
+      const remaining = quota - extractedLeads;
+      if (extractedLeads >= quota) {
+        toast.error("You have already reached your plan's extraction quota. Please upgrade or wait for the next billing cycle.");
+        return;
+      }
+      if (finalLimit > remaining) {
+        toast.error(`Your request of ${finalLimit} leads exceeds your remaining quota of ${remaining} leads.`);
+        return;
+      }
+    }
+
+    mutation.mutate({ city: city.trim(), niche: niche.trim(), limit: finalLimit });
   };
 
   const hotCount = results.filter((r) => r.leadScore >= 75).length;
@@ -257,6 +280,37 @@ function DashboardSearch() {
     <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
       {/* Main column */}
       <div>
+        {/* Quota Tracker */}
+        {hasAccess && !isAdmin && (
+          <Card className="mb-6 border-border/60 bg-card p-5" style={{ boxShadow: "var(--shadow-card)" }}>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div>
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                  Extraction Quota
+                </h3>
+                <p className="text-2xl font-extrabold text-foreground">
+                  {extractedLeads} <span className="text-muted-foreground text-sm font-normal">/ {quota} leads extracted</span>
+                </p>
+              </div>
+              <div className="flex-1 max-w-md w-full">
+                <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                  <span>{percentUsed}% used</span>
+                  <span>{Math.max(0, quota - extractedLeads)} remaining</span>
+                </div>
+                <div className="w-full bg-secondary h-2 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full rounded-full transition-all duration-500" 
+                    style={{ 
+                      width: `${percentUsed}%`, 
+                      background: percentUsed >= 90 ? "oklch(0.6 0.18 29)" : "var(--gradient-hunt)" 
+                    }} 
+                  />
+                </div>
+              </div>
+            </div>
+          </Card>
+        )}
+
         {/* Search */}
         <Card className="mb-6 border-border/60 bg-card p-5" style={{ boxShadow: "var(--shadow-card)" }}>
           <div className="mb-3 flex items-center gap-2">
@@ -265,7 +319,7 @@ function DashboardSearch() {
               New hunt
             </h3>
           </div>
-          <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-[1fr_1fr_auto]">
+          <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-[1fr_1fr_120px_auto]">
             <div>
               <label className="mb-1.5 block text-xs font-medium text-muted-foreground">City</label>
               <div className="relative">
@@ -289,6 +343,24 @@ function DashboardSearch() {
                   value={niche}
                   onChange={(e) => setNiche(e.target.value)}
                   placeholder="barber shop, plumber, dentist…"
+                  className="pl-9"
+                  disabled={mutation.isPending}
+                />
+              </div>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                No. of leads
+              </label>
+              <div className="relative">
+                <Target className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  type="number"
+                  min={1}
+                  max={isAdmin ? 10000 : Math.max(1, quota - extractedLeads)}
+                  value={leadsLimit}
+                  onChange={(e) => setLeadsLimit(e.target.value)}
+                  placeholder="10"
                   className="pl-9"
                   disabled={mutation.isPending}
                 />
@@ -484,7 +556,7 @@ function DashboardSearch() {
                 <span style={{ fontSize: "1rem", color: "oklch(0.5 0.02 250)" }}>/mo</span>
               </div>
               <ul className="pricing-feature-list" style={{ gap: 8, fontSize: "0.85rem" }}>
-                <PricingItem included label="1,000 leads per month" />
+                <PricingItem included label="1,500 leads per month" />
                 <PricingItem included label="Save to library" />
                 <PricingItem included label="Phone numbers" />
                 <PricingItem included label="Prioritized lead scoring" />

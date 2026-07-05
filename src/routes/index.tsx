@@ -53,11 +53,11 @@ function LandingPage() {
   const userEmail = user?.primaryEmailAddress?.emailAddress;
 
   const basicCheckoutUrl = userEmail
-    ? `https://checkout.dodopayments.com/buy/pdt_0NiVJmJzctfUNFC2qgT1k?quantity=1&email=${encodeURIComponent(userEmail)}`
+    ? `https://checkout.dodopayments.com/buy/pdt_0NiVJmJzctfUNFC2qgT1k?quantity=1&email=${encodeURIComponent(userEmail)}&disableEmail=true`
     : "https://checkout.dodopayments.com/buy/pdt_0NiVJmJzctfUNFC2qgT1k?quantity=1";
 
   const proCheckoutUrl = userEmail
-    ? `https://checkout.dodopayments.com/buy/pdt_0NiVK2h79kd3euwcFhI9z?quantity=1&email=${encodeURIComponent(userEmail)}`
+    ? `https://checkout.dodopayments.com/buy/pdt_0NiVK2h79kd3euwcFhI9z?quantity=1&email=${encodeURIComponent(userEmail)}&disableEmail=true`
     : "https://checkout.dodopayments.com/buy/pdt_0NiVK2h79kd3euwcFhI9z?quantity=1";
 
   const handlePaymentClick = (e: React.MouseEvent<HTMLAnchorElement>, checkoutUrl: string) => {
@@ -862,7 +862,7 @@ function LandingPage() {
               <span style={{ fontSize: "1rem", color: "oklch(0.5 0.02 250)" }}>/mo</span>
             </div>
             <ul className="pricing-feature-list">
-              <PricingItem included label="1,000 leads per month" />
+               <PricingItem included label="1,500 leads per month" />
               <PricingItem included label="Save to library" />
               <PricingItem included label="Phone numbers" />
               <PricingItem included label="Prioritized lead scoring" />
