@@ -12,6 +12,19 @@ import {
   Building2,
   User,
   Sparkles,
+  Scissors,
+  Activity,
+  Wrench,
+  Dumbbell,
+  Calculator,
+  Utensils,
+  Eye,
+  Hammer,
+  Brain,
+  Bolt,
+  Apple,
+  Camera,
+  Heart,
 } from "lucide-react";
 import { useAuth, SignInButton, UserButton, useUser } from "@clerk/tanstack-react-start";
 
@@ -43,6 +56,25 @@ export const Route = createFileRoute("/")({
 /* ──────────────────────────────────────────────────────────
  *  LANDING PAGE
  * ────────────────────────────────────────────────────────── */
+
+const niches = [
+  { name: "Barbershops", icon: <Scissors className="h-5 w-5" /> },
+  { name: "Dental Clinics", icon: <Activity className="h-5 w-5" /> },
+  { name: "Auto Repair", icon: <Wrench className="h-5 w-5" /> },
+  { name: "Physical Therapists", icon: <Heart className="h-5 w-5" /> },
+  { name: "Hair Salons", icon: <Scissors className="h-5 w-5" /> },
+  { name: "Accountants", icon: <Calculator className="h-5 w-5" /> },
+  { name: "Gyms", icon: <Dumbbell className="h-5 w-5" /> },
+  { name: "Restaurants", icon: <Utensils className="h-5 w-5" /> },
+  { name: "Beauty Centers", icon: <Sparkles className="h-5 w-5" /> },
+  { name: "Opticians", icon: <Eye className="h-5 w-5" /> },
+  { name: "Remodeling", icon: <Hammer className="h-5 w-5" /> },
+  { name: "Psychologists", icon: <Brain className="h-5 w-5" /> },
+  { name: "Plumbers", icon: <Wrench className="h-5 w-5" /> },
+  { name: "Electricians", icon: <Bolt className="h-5 w-5" /> },
+  { name: "Nutritionists", icon: <Apple className="h-5 w-5" /> },
+  { name: "Photographers", icon: <Camera className="h-5 w-5" /> },
+];
 
 function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -759,6 +791,100 @@ function LandingPage() {
               >
                 {target.desc}
               </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ===== TARGET NICHES ===== */}
+      <section
+        id="niches"
+        className="landing-section"
+        style={{
+          maxWidth: 1200,
+          margin: "0 auto",
+          padding: "5rem 24px",
+        }}
+      >
+        <div style={{ textAlign: "center", marginBottom: 48 }}>
+          <p
+            style={{
+              fontSize: "0.9rem",
+              fontWeight: 600,
+              color: "oklch(0.52 0.22 284.1)",
+              marginBottom: 12,
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+            }}
+          >
+            Target Industries
+          </p>
+          <h2
+            style={{
+              fontSize: "clamp(1.8rem, 3vw, 2.6rem)",
+              fontWeight: 800,
+              lineHeight: 1.15,
+              letterSpacing: "-0.02em",
+              color: "oklch(0.12 0.02 250)",
+            }}
+          >
+            Popular Niches to Target
+          </h2>
+          <p style={{ color: "oklch(0.5 0.02 250)", marginTop: 12, fontSize: "1rem" }}>
+            Find high-ticket clients across these high-demand local business categories in any city.
+          </p>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+            gap: 16,
+          }}
+        >
+          {niches.map((niche) => (
+            <div
+              key={niche.name}
+              className="niche-card"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 16,
+                padding: "16px 20px",
+                background: "white",
+                borderRadius: 16,
+                border: "1px solid oklch(0 0 0 / 0.06)",
+                transition: "transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease",
+                cursor: "default",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-4px)";
+                e.currentTarget.style.borderColor = "oklch(0.62 0.24 284.1 / 0.3)";
+                e.currentTarget.style.boxShadow = "0 12px 30px oklch(0.62 0.24 284.1 / 0.08)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.borderColor = "oklch(0 0 0 / 0.06)";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 40,
+                  height: 40,
+                  borderRadius: 10,
+                  background: "oklch(0.92 0.04 284.1 / 0.4)",
+                  color: "oklch(0.62 0.24 284.1)",
+                }}
+              >
+                {niche.icon}
+              </div>
+              <span style={{ fontWeight: 600, color: "oklch(0.18 0.02 250)", fontSize: "0.95rem" }}>
+                {niche.name}
+              </span>
             </div>
           ))}
         </div>
