@@ -377,35 +377,76 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* ===== TRUST BAR ===== */}
+      {/* ===== PRODUCT DEMO VIDEO ===== */}
       <section
-        id="trust"
+        id="demo"
         style={{
+          padding: "5rem 24px",
+          background: "oklch(0.985 0.002 250 / 0.5)",
+          textAlign: "center",
           borderTop: "1px solid oklch(0 0 0 / 0.06)",
           borderBottom: "1px solid oklch(0 0 0 / 0.06)",
-          padding: "3rem 24px",
-          textAlign: "center",
         }}
       >
-        <p
-          style={{
-            fontSize: "0.9rem",
-            color: "oklch(0.5 0.02 250)",
-            marginBottom: 24,
-            fontWeight: 500,
-          }}
-        >
-          Trusted by{" "}
-          <span style={{ fontWeight: 700, color: "oklch(0.25 0.02 250)" }}>100+ agencies</span>{" "}
-          and freelancers worldwide
-        </p>
-        <div className="trust-logos">
-          <span style={{ fontFamily: "Georgia, serif", fontStyle: "italic", letterSpacing: "-0.03em" }}>webflow</span>
-          <span>Framer</span>
-          <span style={{ fontWeight: 800 }}>Wix</span>
-          <span style={{ fontSize: "0.85rem", letterSpacing: "0.12em", textTransform: "uppercase" as const }}>Squarespace</span>
-          <span style={{ fontWeight: 800 }}>WordPress</span>
-          <span style={{ fontStyle: "italic", letterSpacing: "-0.02em" }}>stripe</span>
+        <div style={{ maxWidth: 800, margin: "0 auto" }}>
+          <p
+            style={{
+              fontSize: "0.9rem",
+              fontWeight: 600,
+              color: "oklch(0.6 0.2 284.1)",
+              marginBottom: 12,
+              textTransform: "uppercase" as const,
+              letterSpacing: "0.05em",
+            }}
+          >
+            Product Demo
+          </p>
+          <h2
+            style={{
+              fontSize: "clamp(1.8rem, 3vw, 2.6rem)",
+              fontWeight: 800,
+              lineHeight: 1.15,
+              letterSpacing: "-0.02em",
+              color: "oklch(0.12 0.02 250)",
+              marginBottom: 36,
+            }}
+          >
+            See HuntX in Action
+          </h2>
+          <div
+            className="video-container"
+            style={{
+              position: "relative",
+              borderRadius: 24,
+              overflow: "hidden",
+              boxShadow: "0 25px 50px -12px oklch(0.4 0.2 284.1 / 0.15)",
+              border: "1px solid oklch(0.6 0.2 284.1 / 0.15)",
+              background: "black",
+              aspectRatio: "16 / 9",
+              transition: "transform 0.3s ease, box-shadow 0.3s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "scale(1.01)";
+              e.currentTarget.style.boxShadow = "0 30px 60px -10px oklch(0.6 0.2 284.1 / 0.25)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "scale(1)";
+              e.currentTarget.style.boxShadow = "0 25px 50px -12px oklch(0.4 0.2 284.1 / 0.15)";
+            }}
+          >
+            <video
+              src="/huntx-demo.mp4"
+              controls
+              playsInline
+              preload="metadata"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                display: "block",
+              }}
+            />
+          </div>
         </div>
       </section>
 
