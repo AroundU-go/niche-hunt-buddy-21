@@ -50,32 +50,37 @@ function computeLeadScore(item: {
 
 export const syncUserProfile = createServerFn({ method: "POST" })
   .handler(async () => {
-    const { userId, getToken } = await auth();
-    if (!userId) {
-      return { synced: false };
+    try {
+      const { userId, getToken } = await auth();
+      if (!userId) {
+        return { synced: false };
+      }
+
+      const user = await clerkClient().users.getUser(userId);
+      const email = user.emailAddresses?.[0]?.emailAddress ?? "";
+
+      const supabaseClient = await getSupabaseClient(getToken);
+      const { error } = await supabaseClient.from("profiles").upsert(
+        {
+          id: userId,
+          email,
+          first_name: user.firstName ?? null,
+          last_name: user.lastName ?? null,
+          last_login: new Date().toISOString(),
+        },
+        { onConflict: "id" }
+      );
+
+      if (error) {
+        console.error("Supabase profile sync error:", error.message);
+        return { synced: false, error: error.message };
+      }
+
+      return { synced: true };
+    } catch (err: any) {
+      console.error("Fatal error in syncUserProfile server function:", err);
+      return { synced: false, error: err.message || String(err) };
     }
-
-    const user = await clerkClient().users.getUser(userId);
-    const email = user.emailAddresses?.[0]?.emailAddress ?? "";
-
-    const supabaseClient = await getSupabaseClient(getToken);
-    const { error } = await supabaseClient.from("profiles").upsert(
-      {
-        id: userId,
-        email,
-        first_name: user.firstName ?? null,
-        last_name: user.lastName ?? null,
-        last_login: new Date().toISOString(),
-      },
-      { onConflict: "id" }
-    );
-
-    if (error) {
-      console.error("Supabase profile sync error:", error.message);
-      return { synced: false, error: error.message };
-    }
-
-    return { synced: true };
   });
 
 export const searchLeads = createServerFn({ method: "POST" })
@@ -247,25 +252,30 @@ export type SearchHistoryItem = {
 
 export const getSearchHistory = createServerFn({ method: "GET" })
   .handler(async () => {
-    const { userId, getToken } = await auth();
-    if (!userId) {
-      return { history: [] as SearchHistoryItem[] };
+    try {
+      const { userId, getToken } = await auth();
+      if (!userId) {
+        return { history: [] as SearchHistoryItem[] };
+      }
+
+      const supabaseClient = await getSupabaseClient(getToken);
+      const { data, error } = await supabaseClient
+        .from("searches")
+        .select("id, city, niche, results, created_at")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+      if (error) {
+        console.error("Supabase history fetch error:", error.message);
+        return { history: [] as SearchHistoryItem[] };
+      }
+
+      return { history: (data ?? []) as SearchHistoryItem[] };
+    } catch (err: any) {
+      console.error("Fatal error in getSearchHistory server function:", err);
+      return { history: [] as SearchHistoryItem[], error: err.message || String(err) };
     }
-
-    const supabaseClient = await getSupabaseClient(getToken);
-    const { data, error } = await supabaseClient
-      .from("searches")
-      .select("id, city, niche, results, created_at")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(20);
-
-    if (error) {
-      console.error("Supabase history fetch error:", error.message);
-      return { history: [] as SearchHistoryItem[] };
-    }
-
-    return { history: (data ?? []) as SearchHistoryItem[] };
   });
 
 /* ────────────────────────────
@@ -274,25 +284,30 @@ export const getSearchHistory = createServerFn({ method: "GET" })
 
 export const getUserPlan = createServerFn({ method: "GET" })
   .handler(async () => {
-    const { userId, getToken } = await auth();
-    if (!userId) {
-      return { plan: null, email: null };
+    try {
+      const { userId, getToken } = await auth();
+      if (!userId) {
+        return { plan: null, email: null };
+      }
+
+      const user = await clerkClient().users.getUser(userId);
+      const email = user.emailAddresses?.[0]?.emailAddress ?? "";
+
+      const supabaseClient = await getSupabaseClient(getToken);
+      const { data: profile, error } = await supabaseClient
+        .from("profiles")
+        .select("plan")
+        .eq("id", userId)
+        .single();
+
+      if (error) {
+        console.error("Error fetching user plan:", error.message);
+        return { plan: null, email };
+      }
+
+      return { plan: profile?.plan ?? null, email };
+    } catch (err: any) {
+      console.error("Fatal error in getUserPlan server function:", err);
+      return { plan: null, email: null, error: err.message || String(err) };
     }
-
-    const user = await clerkClient().users.getUser(userId);
-    const email = user.emailAddresses?.[0]?.emailAddress ?? "";
-
-    const supabaseClient = await getSupabaseClient(getToken);
-    const { data: profile, error } = await supabaseClient
-      .from("profiles")
-      .select("plan")
-      .eq("id", userId)
-      .single();
-
-    if (error) {
-      console.error("Error fetching user plan:", error.message);
-      return { plan: null, email };
-    }
-
-    return { plan: profile?.plan ?? null, email };
   });
