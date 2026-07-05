@@ -230,7 +230,7 @@ function DashboardSearch() {
   });
 
   const restoreHistory = (item: SearchHistoryItem) => {
-    setResults(item.results);
+    setResults(item.results || []);
     setMeta({ city: item.city, niche: item.niche });
     setCity(item.city);
     setNiche(item.niche);
@@ -392,7 +392,7 @@ function DashboardSearch() {
                       <p className="truncate text-xs text-muted-foreground">{item.city}</p>
                     </div>
                     <Badge variant="secondary" className="shrink-0 text-[10px]">
-                      {item.results.length} leads
+                      {(item.results || []).length} leads
                     </Badge>
                   </div>
                   <div className="mt-1.5 flex items-center gap-1 text-[10px] text-muted-foreground">
