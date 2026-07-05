@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { auth, clerkClient } from "@clerk/tanstack-react-start/server";
-import { supabase } from "./supabase";
+import { supabase, getSupabaseClient } from "./supabase";
 
 export type Lead = {
   placeId: string;
@@ -50,7 +50,7 @@ function computeLeadScore(item: {
 
 export const syncUserProfile = createServerFn({ method: "POST" })
   .handler(async () => {
-    const { userId } = await auth();
+    const { userId, getToken } = await auth();
     if (!userId) {
       return { synced: false };
     }
@@ -58,7 +58,8 @@ export const syncUserProfile = createServerFn({ method: "POST" })
     const user = await clerkClient.users.getUser(userId);
     const email = user.emailAddresses?.[0]?.emailAddress ?? "";
 
-    const { error } = await supabase.from("profiles").upsert(
+    const supabaseClient = await getSupabaseClient(getToken);
+    const { error } = await supabaseClient.from("profiles").upsert(
       {
         id: userId,
         email,
@@ -94,14 +95,16 @@ export const searchLeads = createServerFn({ method: "POST" })
     let limit = 3;
     // --- Clerk: get authenticated user ---
     let userId: string | null = null;
+    let supabaseClient = supabase;
     try {
-      const authObj = await auth();
-      userId = authObj.userId;
+      const { userId: authedId, getToken } = await auth();
+      userId = authedId;
       if (userId) {
+        supabaseClient = await getSupabaseClient(getToken);
         const user = await clerkClient.users.getUser(userId);
         const email = user.emailAddresses?.[0]?.emailAddress ?? "";
         // Upsert profile in Supabase
-        await supabase.from("profiles").upsert(
+        await supabaseClient.from("profiles").upsert(
           {
             id: userId,
             email,
@@ -113,7 +116,7 @@ export const searchLeads = createServerFn({ method: "POST" })
         );
 
         // Fetch plan status to determine search limits dynamically
-        const { data: profile } = await supabase
+        const { data: profile } = await supabaseClient
           .from("profiles")
           .select("plan")
           .eq("id", userId)
@@ -210,7 +213,7 @@ export const searchLeads = createServerFn({ method: "POST" })
 
     // --- Log search to Supabase ---
     if (userId) {
-      await supabase.from("searches").insert({
+      await supabaseClient.from("searches").insert({
         user_id: userId,
         city: data.city,
         niche: data.niche,
@@ -237,12 +240,13 @@ export type SearchHistoryItem = {
 
 export const getSearchHistory = createServerFn({ method: "GET" })
   .handler(async () => {
-    const { userId } = await auth();
+    const { userId, getToken } = await auth();
     if (!userId) {
       return { history: [] as SearchHistoryItem[] };
     }
 
-    const { data, error } = await supabase
+    const supabaseClient = await getSupabaseClient(getToken);
+    const { data, error } = await supabaseClient
       .from("searches")
       .select("id, city, niche, results, created_at")
       .eq("user_id", userId)

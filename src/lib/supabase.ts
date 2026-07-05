@@ -15,3 +15,21 @@ if (!supabaseUrl || !supabaseKey) {
 }
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
+
+export async function getSupabaseClient(getToken: (options?: { template?: string }) => Promise<string | null>) {
+  try {
+    const token = await getToken({ template: "supabase" });
+    if (token) {
+      return createClient(supabaseUrl, supabaseKey, {
+        global: {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      });
+    }
+  } catch (e) {
+    console.error("Error getting Supabase JWT token:", e);
+  }
+  return supabase;
+}
