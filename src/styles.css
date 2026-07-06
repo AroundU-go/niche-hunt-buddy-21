@@ -483,17 +483,83 @@ html {
 @media (max-width: 1024px) {
   .globe-container {
     max-width: 400px;
-    margin: 0 auto;
+    margin: 30px auto 0;
   }
+  
   .lead-card-float {
+    min-width: 130px;
+    padding: 6px 10px;
+    gap: 8px;
+    border-radius: 10px;
+  }
+  
+  .lead-card-float .avatar {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .lead-card-float .online-dot {
+    width: 8px;
+    height: 8px;
+    top: 6px;
+    left: 32px;
+  }
+  
+  .lead-card-float .detail {
     display: none;
   }
+  
+  .lead-card-float .name {
+    font-size: 11px;
+  }
+  
+  .lead-card-float .status-badge {
+    font-size: 8px;
+    padding: 1px 6px;
+    margin-top: 1px;
+  }
+  
+  .lead-card-float:nth-child(2) { top: 2% !important; left: 10% !important; right: auto !important; }
+  .lead-card-float:nth-child(3) { top: 8% !important; right: 2% !important; left: auto !important; }
+  .lead-card-float:nth-child(4) { top: 32% !important; left: 2% !important; right: auto !important; }
+  .lead-card-float:nth-child(5) { top: 52% !important; right: -2% !important; left: auto !important; }
+  .lead-card-float:nth-child(6) { top: 62% !important; left: 8% !important; right: auto !important; }
+  .lead-card-float:nth-child(7) { top: 78% !important; right: 5% !important; left: auto !important; }
 }
 
 @media (max-width: 640px) {
   .globe-container {
-    max-width: 300px;
+    max-width: 280px;
   }
+  
+  .lead-card-float {
+    min-width: 110px;
+    padding: 5px 8px;
+    gap: 6px;
+    border-radius: 8px;
+  }
+  
+  .lead-card-float .avatar {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .lead-card-float .online-dot {
+    width: 6px;
+    height: 6px;
+    top: 5px;
+    left: 24px;
+  }
+  
+  .lead-card-float .name {
+    font-size: 9px;
+  }
+  
+  .lead-card-float .status-badge {
+    font-size: 7px;
+    padding: 1px 4px;
+  }
+  
   .landing-section {
     padding: 3rem 0;
   }
