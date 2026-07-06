@@ -119,18 +119,37 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        <script src="https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js" type="text/javascript" />
         <script
           type="text/javascript"
           dangerouslySetInnerHTML={{
             __html: `
-              (function(e,c){if(!c.__SV){var l,h;window.mixpanel=c;c._i=[];c.init=function(q,r,f){function t(d,a){var g=a.split(".");2==g.length&&(d=d[g[0]],a=g[1]);d[a]=function(){d.push([a].concat(Array.prototype.slice.call(arguments,0)))}}var b=c;"undefined"!==typeof f?b=c[f]=[]:f="mixpanel";b.people=b.people||[];b.toString=function(d){var a="mixpanel";"mixpanel"!==f&&(a+="."+f);d||(a+=" (stub)");return a};b.people.toString=function(){return b.toString(1)+".people (stub)"};l="disable time_event track track_pageview track_links track_forms track_with_groups add_group set_group remove_group register register_once alias unregister identify name_tag set_config reset opt_in_tracking opt_out_tracking has_opted_in_tracking has_opted_out_tracking clear_opt_in_out_tracking start_batch_senders start_session_recording stop_session_recording people.set people.set_once people.unset people.increment people.append people.union people.track_charge people.clear_charges people.delete_user people.remove".split(" ");
-              for(h=0;h<l.length;h++)t(b,l[h]);var n="set set_once union unset remove delete".split(" ");b.get_group=function(){function d(p){a[p]=function(){b.push([g,[p].concat(Array.prototype.slice.call(arguments,0))])}}for(var a={},g=["get_group"].concat(Array.prototype.slice.call(arguments,0)),m=0;m<n.length;m++)d(n[m]);return a};c._i.push([q,r,f])};c.__SV=1.2;var k=e.createElement("script");k.type="text/javascript";k.async=!0;k.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?MIXPANEL_CUSTOM_LIB_URL:"file:"===
-              e.location.protocol&&"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js";e=e.getElementsByTagName("script")[0];e.parentNode.insertBefore(k,e)}})(document,window.mixpanel||[])
-
+              window.mixpanel = window.mixpanel || [];
+              if (typeof mixpanel.init !== 'function') {
+                // Stub out mixpanel functions in case script loading is delayed
+                mixpanel = {
+                  _i: [],
+                  init: function(q, r, f) {
+                    var b = mixpanel;
+                    if (typeof f !== 'undefined') b = mixpanel[f] = [];
+                    else f = 'mixpanel';
+                    b.people = b.people || [];
+                    var l = "disable time_event track track_pageview track_links track_forms track_with_groups add_group set_group remove_group register register_once alias unregister identify name_tag set_config reset opt_in_tracking opt_out_tracking has_opted_in_tracking has_opted_out_tracking clear_opt_in_out_tracking start_batch_senders start_session_recording stop_session_recording people.set people.set_once people.unset people.increment people.append people.union people.track_charge people.clear_charges people.delete_user people.remove".split(" ");
+                    for (var h = 0; h < l.length; h++) {
+                      (function(a) {
+                        b[a] = function() {
+                          b.push([a].concat(Array.prototype.slice.call(arguments, 0)));
+                        };
+                      })(l[h]);
+                    }
+                    b._i.push([q, r, f]);
+                  }
+                };
+              }
               mixpanel.init('b9e4c220a8aae7034865be21542d2112', {
                 autocapture: true,
                 record_sessions_percent: 100,
-              })
+              });
             `,
           }}
         />
@@ -145,6 +164,18 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+
+  // SPA navigation tracking for Mixpanel
+  useEffect(() => {
+    const mp = (window as any).mixpanel;
+    if (mp && typeof mp.track === "function") {
+      mp.track("Page View", {
+        path: router.state.location.pathname,
+        href: window.location.href,
+      });
+    }
+  }, [router.state.location.pathname]);
 
   return (
     <ClerkProvider
