@@ -84,13 +84,16 @@ function LandingPage() {
 
   const userEmail = user?.primaryEmailAddress?.emailAddress;
 
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://tryhuntx.site";
+  const redirectParam = `&redirect_url=${encodeURIComponent(origin + "/dashboard")}`;
+
   const basicCheckoutUrl = userEmail
-    ? `https://checkout.dodopayments.com/buy/pdt_0NiVJmJzctfUNFC2qgT1k?quantity=1&email=${encodeURIComponent(userEmail)}&disableEmail=true`
-    : "https://checkout.dodopayments.com/buy/pdt_0NiVJmJzctfUNFC2qgT1k?quantity=1";
+    ? `https://checkout.dodopayments.com/buy/pdt_0NiVJmJzctfUNFC2qgT1k?quantity=1&email=${encodeURIComponent(userEmail)}&disableEmail=true${redirectParam}`
+    : `https://checkout.dodopayments.com/buy/pdt_0NiVJmJzctfUNFC2qgT1k?quantity=1${redirectParam}`;
 
   const proCheckoutUrl = userEmail
-    ? `https://checkout.dodopayments.com/buy/pdt_0NiVK2h79kd3euwcFhI9z?quantity=1&email=${encodeURIComponent(userEmail)}&disableEmail=true`
-    : "https://checkout.dodopayments.com/buy/pdt_0NiVK2h79kd3euwcFhI9z?quantity=1";
+    ? `https://checkout.dodopayments.com/buy/pdt_0NiVK2h79kd3euwcFhI9z?quantity=1&email=${encodeURIComponent(userEmail)}&disableEmail=true${redirectParam}`
+    : `https://checkout.dodopayments.com/buy/pdt_0NiVK2h79kd3euwcFhI9z?quantity=1${redirectParam}`;
 
   const handlePaymentClick = (e: React.MouseEvent<HTMLAnchorElement>, checkoutUrl: string) => {
     if (!isSignedIn) {

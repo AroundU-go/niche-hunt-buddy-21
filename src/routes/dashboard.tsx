@@ -237,13 +237,16 @@ function DashboardSearch() {
   const quota = userPlan === "pro" ? 1500 : userPlan === "basic" ? 100 : 0;
   const percentUsed = quota > 0 ? Math.min(100, Math.round((extractedLeads / quota) * 100)) : 0;
 
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://tryhuntx.site";
+  const redirectParam = `&redirect_url=${encodeURIComponent(origin + "/dashboard")}`;
+
   const basicCheckoutUrl = userEmail
-    ? `https://checkout.dodopayments.com/buy/pdt_0NiVJmJzctfUNFC2qgT1k?quantity=1&email=${encodeURIComponent(userEmail)}&disableEmail=true`
-    : "https://checkout.dodopayments.com/buy/pdt_0NiVJmJzctfUNFC2qgT1k?quantity=1";
+    ? `https://checkout.dodopayments.com/buy/pdt_0NiVJmJzctfUNFC2qgT1k?quantity=1&email=${encodeURIComponent(userEmail)}&disableEmail=true${redirectParam}`
+    : `https://checkout.dodopayments.com/buy/pdt_0NiVJmJzctfUNFC2qgT1k?quantity=1${redirectParam}`;
 
   const proCheckoutUrl = userEmail
-    ? `https://checkout.dodopayments.com/buy/pdt_0NiVK2h79kd3euwcFhI9z?quantity=1&email=${encodeURIComponent(userEmail)}&disableEmail=true`
-    : "https://checkout.dodopayments.com/buy/pdt_0NiVK2h79kd3euwcFhI9z?quantity=1";
+    ? `https://checkout.dodopayments.com/buy/pdt_0NiVK2h79kd3euwcFhI9z?quantity=1&email=${encodeURIComponent(userEmail)}&disableEmail=true${redirectParam}`
+    : `https://checkout.dodopayments.com/buy/pdt_0NiVK2h79kd3euwcFhI9z?quantity=1${redirectParam}`;
 
   const mutation = useMutation({
     mutationFn: async (vars: { city: string; niche: string; limit: number }) =>
