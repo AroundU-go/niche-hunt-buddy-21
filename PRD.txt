@@ -1,0 +1,17 @@
+Pricing plans: 
+
+1. $9/mo (100 leads, Save to library, Phone numbers, Prioritized lead scoring)
+2. $49/mo[Basic Plan] (1000 leads, Emails, CSV export, Ready to send email)
+
+Dashboard: (Refine the existing search page as per this)
+
+1. Total leads
+2. Library (Saved leads by catgeory)
+
+
+
+
+
+
+
+ 

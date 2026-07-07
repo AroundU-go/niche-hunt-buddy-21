@@ -944,9 +944,7 @@ function LandingPage() {
               <PricingItem included label="Save to library" />
               <PricingItem included label="Phone numbers" />
               <PricingItem included label="Prioritized lead scoring" />
-              <PricingItem included={false} label="Email addresses" />
               <PricingItem included={false} label="CSV export" />
-              <PricingItem included={false} label="Ready to send emails" />
             </ul>
             <a
               href={basicCheckoutUrl}
@@ -992,7 +990,6 @@ function LandingPage() {
               <PricingItem included label="Save to library" />
               <PricingItem included label="Phone numbers" />
               <PricingItem included label="Prioritized lead scoring" />
-              <PricingItem included label="Email addresses" />
               <PricingItem included label="CSV export" />
             </ul>
             <a
@@ -1110,11 +1107,11 @@ function LandingPage() {
           {[
             {
               title: "Product",
-              links: ["Features", "Pricing", "How It Works", "Changelog"],
+              links: ["Features", "Pricing", "How It Works"],
             },
             {
               title: "Resources",
-              links: ["Blog", "Help Center", "Community", "API Docs"],
+              links: ["Blog"],
             },
             {
               title: "Company",

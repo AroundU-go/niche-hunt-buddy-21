@@ -16,6 +16,7 @@ import {
   Building2,
   History,
   Clock,
+  Download,
 } from "lucide-react";
 import { searchLeads, getSearchHistory, syncUserProfile, getUserPlan, requireAuth, type Lead, type SearchHistoryItem } from "@/lib/leads.functions";
 import { Button } from "@/components/ui/button";
@@ -239,6 +240,62 @@ function DashboardSearch() {
     toast.success(`Restored results for ${item.niche} in ${item.city}`);
   };
 
+  const exportToCSV = () => {
+    if (userPlan !== "pro" && !isAdmin) {
+      toast.error("CSV Export is only available on the Pro plan. Please upgrade to Pro.");
+      setPricingModalOpen(true);
+      return;
+    }
+
+    if (results.length === 0) return;
+
+    const headers = [
+      "Business Name",
+      "Category",
+      "Address",
+      "Phone",
+      "Lead Score",
+      "Rating",
+      "Reviews Count",
+      "Google Maps URL"
+    ];
+
+    const rows = results.map(lead => [
+      lead.title || "",
+      lead.categoryName || "",
+      lead.address || "",
+      lead.phone || "",
+      lead.leadScore || 0,
+      lead.totalScore != null ? lead.totalScore : "",
+      lead.reviewsCount != null ? lead.reviewsCount : "",
+      lead.url || ""
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => 
+        row.map(val => {
+          const str = String(val).replace(/"/g, '""');
+          return `"${str}"`;
+        }).join(",")
+      )
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    
+    const fileName = `leads-${(meta?.niche || "search").toLowerCase().replace(/[^a-z0-9]/g, "-")}-${(meta?.city || "results").toLowerCase().replace(/[^a-z0-9]/g, "-")}.csv`;
+    link.setAttribute("download", fileName);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success("CSV file downloaded successfully!");
+  };
+
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!city.trim() || !niche.trim()) return;
@@ -407,12 +464,28 @@ function DashboardSearch() {
         {/* Results */}
         {results.length > 0 ? (
           <div>
-            <div className="mb-4 flex items-baseline justify-between">
+            <div className="mb-4 flex items-center justify-between gap-4 flex-wrap">
               <h3 className="text-lg font-semibold">
                 Leads for <span className="text-primary">{meta?.niche}</span> in{" "}
                 <span className="text-primary">{meta?.city}</span>
               </h3>
-              <p className="text-xs text-muted-foreground">Sorted by lead score</p>
+              <div className="flex items-center gap-3">
+                <Button
+                  onClick={exportToCSV}
+                  variant="outline"
+                  size="sm"
+                  className="h-8 gap-1.5 text-xs font-medium border-primary/20 hover:border-primary/40 hover:bg-primary/5 text-foreground"
+                >
+                  <Download className="h-3.5 w-3.5 text-primary" />
+                  Export CSV
+                  {(!isAdmin && userPlan !== "pro") && (
+                    <span className="ml-1 rounded bg-primary/10 px-1 py-0.5 text-[9px] font-semibold text-primary uppercase">
+                      Pro
+                    </span>
+                  )}
+                </Button>
+                <p className="text-xs text-muted-foreground">Sorted by lead score</p>
+              </div>
             </div>
             <div className="grid gap-4">
               {results.map((lead) => (
@@ -510,9 +583,7 @@ function DashboardSearch() {
                 <PricingItem included label="Save to library" />
                 <PricingItem included label="Phone numbers" />
                 <PricingItem included label="Prioritized lead scoring" />
-                <PricingItem included={false} label="Email addresses" />
                 <PricingItem included={false} label="CSV export" />
-                <PricingItem included={false} label="Ready to send emails" />
               </ul>
               <a
                 href={basicCheckoutUrl}
@@ -560,7 +631,6 @@ function DashboardSearch() {
                 <PricingItem included label="Save to library" />
                 <PricingItem included label="Phone numbers" />
                 <PricingItem included label="Prioritized lead scoring" />
-                <PricingItem included label="Email addresses" />
                 <PricingItem included label="CSV export" />
               </ul>
               <a
