@@ -48,6 +48,7 @@ export const Route = createFileRoute("/dashboard")({
 
 function DashboardPage() {
   const runSyncProfile = useServerFn(syncUserProfile);
+  const runGetUserPlan = useServerFn(getUserPlan);
 
   // Sync user profile to Supabase on dashboard load
   useEffect(() => {
@@ -63,6 +64,16 @@ function DashboardPage() {
         toast.error(`Profile Sync connection error: ${err.message || err}`);
       });
   }, []);
+
+  const planQuery = useQuery({
+    queryKey: ["userPlan"],
+    queryFn: () => runGetUserPlan(),
+  });
+
+  const userPlan = planQuery.data?.plan ?? null;
+  const userEmail = planQuery.data?.email ?? "";
+  const isAdmin = userEmail === "uddimakesit@gmail.com";
+  const hasAccess = isAdmin || userPlan === "pro" || userPlan === "basic";
 
   return (
     <div
@@ -123,6 +134,11 @@ function DashboardPage() {
 
           {/* User controls */}
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            {hasAccess && (
+              <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary uppercase tracking-wider">
+                {isAdmin ? "Admin" : userPlan === "pro" ? "PRO" : "BASIC"}
+              </span>
+            )}
             <a
               href="https://accounts.tryhuntx.site/user"
               style={{
@@ -154,17 +170,24 @@ function DashboardPage() {
       {/* Main content */}
       <main style={{ maxWidth: 1200, margin: "0 auto", padding: "2rem 24px" }}>
         <div style={{ marginBottom: 32 }}>
-          <h1
-            style={{
-              fontSize: "1.8rem",
-              fontWeight: 800,
-              letterSpacing: "-0.02em",
-              color: "oklch(0.12 0.02 250)",
-              marginBottom: 8,
-            }}
-          >
-            Find Your Next Client
-          </h1>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+            <h1
+              style={{
+                fontSize: "1.8rem",
+                fontWeight: 800,
+                letterSpacing: "-0.02em",
+                color: "oklch(0.12 0.02 250)",
+                margin: 0,
+              }}
+            >
+              Find Your Next Client
+            </h1>
+            {hasAccess && (
+              <span className="rounded bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary uppercase tracking-wider">
+                {isAdmin ? "Admin" : userPlan === "pro" ? "PRO" : "BASIC"}
+              </span>
+            )}
+          </div>
           <p style={{ color: "oklch(0.5 0.02 250)", fontSize: "1rem" }}>
             Enter a city and business niche to discover leads without websites.
           </p>
@@ -358,8 +381,11 @@ function DashboardSearch() {
           <Card className="mb-6 border-border/60 bg-card p-5" style={{ boxShadow: "var(--shadow-card)" }}>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-2">
                   Extraction Quota
+                  <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold text-primary uppercase">
+                    {userPlan === "pro" ? "PRO" : "BASIC"}
+                  </span>
                 </h3>
                 <p className="text-2xl font-extrabold text-foreground">
                   {extractedLeads} <span className="text-muted-foreground text-sm font-normal">/ {quota} leads extracted</span>
