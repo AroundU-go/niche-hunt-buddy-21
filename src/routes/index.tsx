@@ -95,7 +95,7 @@ function LandingPage() {
   const handlePaymentClick = (e: React.MouseEvent<HTMLAnchorElement>, checkoutUrl: string) => {
     if (!isSignedIn) {
       e.preventDefault();
-      navigate({ to: "/sign-in" });
+      window.location.href = "https://accounts.tryhuntx.site/sign-in";
     }
   };
 
@@ -187,8 +187,8 @@ function LandingPage() {
           <div style={{ display: "flex", alignItems: "center", gap: 16 }} className="desktop-nav">
             {isLoaded && !isSignedIn && (
               <>
-                <Link
-                  to="/sign-in"
+                <a
+                  href="https://accounts.tryhuntx.site/sign-in"
                   style={{
                     fontSize: "0.9rem",
                     fontWeight: 500,
@@ -197,10 +197,14 @@ function LandingPage() {
                   }}
                 >
                   Log in
-                </Link>
-                <Link to="/sign-up" className="btn-primary" style={{ padding: "10px 22px", fontSize: "0.85rem" }}>
+                </a>
+                <a
+                  href="https://accounts.tryhuntx.site/sign-up"
+                  className="btn-primary"
+                  style={{ padding: "10px 22px", fontSize: "0.85rem", textDecoration: "none" }}
+                >
                   Get Started
-                </Link>
+                </a>
               </>
             )}
             {isLoaded && isSignedIn && (
@@ -277,8 +281,8 @@ function LandingPage() {
             <div style={{ display: "flex", gap: 12, marginTop: 8, alignItems: "center" }}>
               {isLoaded && !isSignedIn && (
                 <>
-                  <Link
-                    to="/sign-in"
+                  <a
+                    href="https://accounts.tryhuntx.site/sign-in"
                     style={{
                       fontSize: "0.9rem",
                       fontWeight: 500,
@@ -289,15 +293,15 @@ function LandingPage() {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Log in
-                  </Link>
-                  <Link
-                    to="/sign-up"
+                  </a>
+                  <a
+                    href="https://accounts.tryhuntx.site/sign-up"
                     className="btn-primary"
-                    style={{ padding: "10px 22px", fontSize: "0.85rem" }}
+                    style={{ padding: "10px 22px", fontSize: "0.85rem", textDecoration: "none" }}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Get Started
-                  </Link>
+                  </a>
                 </>
               )}
               {isLoaded && isSignedIn && (
@@ -384,10 +388,21 @@ function LandingPage() {
           </p>
 
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 36 }}>
-            <Link to={isLoaded && isSignedIn ? "/dashboard" : "/sign-up"} className="btn-primary">
-              Find businesses
-              <ChevronRight style={{ width: 18, height: 18 }} />
-            </Link>
+            {isLoaded && isSignedIn ? (
+              <Link to="/dashboard" className="btn-primary">
+                Find businesses
+                <ChevronRight style={{ width: 18, height: 18 }} />
+              </Link>
+            ) : (
+              <a
+                href="https://accounts.tryhuntx.site/sign-up"
+                className="btn-primary"
+                style={{ textDecoration: "none" }}
+              >
+                Find businesses
+                <ChevronRight style={{ width: 18, height: 18 }} />
+              </a>
+            )}
           </div>
 
           {/* Feature Pills */}
@@ -1034,33 +1049,63 @@ function LandingPage() {
         <p style={{ fontSize: "1.05rem", color: "oklch(1 0 0 / 0.8)", marginBottom: 28, maxWidth: 480, margin: "0 auto 28px" }}>
           Join 100+ agencies already using HuntX to find and close more web design deals.
         </p>
-        <Link
-          to={isLoaded && isSignedIn ? "/dashboard" : "/sign-up"}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "14px 32px",
-            background: "white",
-            color: "oklch(0.45 0.2 284.1)",
-            borderRadius: 12,
-            fontWeight: 700,
-            fontSize: "1rem",
-            textDecoration: "none",
-            transition: "transform 0.15s, box-shadow 0.15s",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-2px)";
-            e.currentTarget.style.boxShadow = "0 8px 24px oklch(0 0 0 / 0.2)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow = "none";
-          }}
-        >
-          {isLoaded && isSignedIn ? "Go to Dashboard" : "Start Free Trial"}
-          <ChevronRight style={{ width: 18, height: 18 }} />
-        </Link>
+        {isLoaded && isSignedIn ? (
+          <Link
+            to="/dashboard"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "14px 32px",
+              background: "white",
+              color: "oklch(0.45 0.2 284.1)",
+              borderRadius: 12,
+              fontWeight: 700,
+              fontSize: "1rem",
+              textDecoration: "none",
+              transition: "transform 0.15s, box-shadow 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-2px)";
+              e.currentTarget.style.boxShadow = "0 8px 24px oklch(0 0 0 / 0.2)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "none";
+            }}
+          >
+            Go to Dashboard
+            <ChevronRight style={{ width: 18, height: 18 }} />
+          </Link>
+        ) : (
+          <a
+            href="https://accounts.tryhuntx.site/sign-up"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "14px 32px",
+              background: "white",
+              color: "oklch(0.45 0.2 284.1)",
+              borderRadius: 12,
+              fontWeight: 700,
+              fontSize: "1rem",
+              textDecoration: "none",
+              transition: "transform 0.15s, box-shadow 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-2px)";
+              e.currentTarget.style.boxShadow = "0 8px 24px oklch(0 0 0 / 0.2)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "none";
+            }}
+          >
+            Start Free Trial
+            <ChevronRight style={{ width: 18, height: 18 }} />
+          </a>
+        )}
       </section>
 
       {/* ===== FOOTER ===== */}

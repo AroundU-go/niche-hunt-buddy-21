@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SignUp } from "@clerk/tanstack-react-start";
 import { Crosshair } from "lucide-react";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/sign-up")({
   head: () => ({
@@ -16,6 +17,10 @@ export const Route = createFileRoute("/sign-up")({
 });
 
 function SignUpPage() {
+  useEffect(() => {
+    window.location.href = "https://accounts.tryhuntx.site/sign-up";
+  }, []);
+
   return (
     <div
       style={{
@@ -69,7 +74,7 @@ function SignUpPage() {
           <SignUp
             routing="hash"
             forceRedirectUrl="/dashboard"
-            signInUrl="/sign-in"
+            signInUrl="https://accounts.tryhuntx.site/sign-in"
           />
         </div>
       </div>
