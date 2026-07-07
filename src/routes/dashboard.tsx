@@ -123,8 +123,24 @@ function DashboardPage() {
 
           {/* User controls */}
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <a
+              href="https://accounts.tryhuntx.site/user"
+              style={{
+                fontSize: "0.85rem",
+                fontWeight: 500,
+                color: "oklch(0.4 0.02 250)",
+                textDecoration: "none",
+                transition: "color 0.15s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "oklch(0.18 0.02 250)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "oklch(0.4 0.02 250)")}
+            >
+              Profile
+            </a>
             <UserButton
               afterSignOutUrl="/"
+              userProfileMode="navigation"
+              userProfileUrl="https://accounts.tryhuntx.site/user"
               appearance={{
                 elements: {
                   avatarBox: { width: 36, height: 36 },
