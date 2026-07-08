@@ -975,6 +975,61 @@ function LandingPage() {
           </p>
         </div>
 
+        {/* Recovery Value Highlight Card */}
+        <div
+          style={{
+            maxWidth: 780,
+            margin: "0 auto 40px",
+            padding: "24px 32px",
+            background: "linear-gradient(135deg, oklch(0.99 0.005 284.1), oklch(0.96 0.02 284.1))",
+            borderRadius: 20,
+            border: "1px solid oklch(0.62 0.24 284.1 / 0.12)",
+            display: "flex",
+            flexDirection: "row" as const,
+            alignItems: "center",
+            gap: 28,
+            boxShadow: "0 10px 30px oklch(0 0 0 / 0.02)",
+          }}
+          className="recovery-card"
+        >
+          <div
+            style={{
+              fontSize: "clamp(3rem, 6vw, 4.5rem)",
+              fontWeight: 900,
+              background: "var(--gradient-hunt)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              lineHeight: 1,
+              flexShrink: 0,
+            }}
+          >
+            20&times;
+          </div>
+          <div>
+            <h4
+              style={{
+                fontSize: "1.1rem",
+                fontWeight: 700,
+                color: "oklch(0.12 0.02 250)",
+                marginBottom: 6,
+                lineHeight: 1.3,
+              }}
+            >
+              you recover your investment with your first web sale.
+            </h4>
+            <p
+              style={{
+                fontSize: "0.95rem",
+                color: "oklch(0.45 0.02 250)",
+                lineHeight: 1.5,
+                margin: 0,
+              }}
+            >
+              Huntly users pay $9/month. A single website is worth $200 or more. Close one and the plan is paid for 20 times over.
+            </p>
+          </div>
+        </div>
+
         <div
           style={{
             display: "grid",
@@ -1315,6 +1370,15 @@ function LandingPage() {
           }
           #hero > div:first-child > div:nth-last-child(2) {
             justify-content: center;
+          }
+        }
+
+        @media (max-width: 600px) {
+          .recovery-card {
+            flex-direction: column !important;
+            text-align: center;
+            gap: 16px !important;
+            padding: 24px 20px !important;
           }
         }
       `}</style>
