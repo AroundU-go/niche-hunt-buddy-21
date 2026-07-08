@@ -105,10 +105,12 @@ export const searchLeads = createServerFn({ method: "POST" })
     let hasAccess = true;
     let userPlan = "free";
     let userEmail = "";
+    let clerkGetToken: any = null;
 
     try {
       const { userId: authedId, getToken } = await auth();
       userId = authedId;
+      clerkGetToken = getToken;
       if (userId) {
         supabaseClient = await getSupabaseClient(getToken);
         const user = await clerkClient().users.getUser(userId);
@@ -259,7 +261,9 @@ export const searchLeads = createServerFn({ method: "POST" })
 
     // --- Log search to Supabase ---
     if (userId) {
-      await supabaseClient.from("searches").insert({
+      // Re-fetch token and client to prevent token expiry issues during long Apify operations
+      const freshSupabaseClient = clerkGetToken ? await getSupabaseClient(clerkGetToken) : supabaseClient;
+      await freshSupabaseClient.from("searches").insert({
         user_id: userId,
         city: data.city,
         niche: data.niche,
