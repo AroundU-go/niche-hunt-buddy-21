@@ -1,5 +1,5 @@
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
-import { useState, lazy, Suspense } from "react";
+import { useState, lazy, Suspense, useEffect } from "react";
 import {
   Crosshair,
   Loader2,
@@ -81,6 +81,26 @@ function LandingPage() {
   const { isLoaded, isSignedIn } = useAuth();
   const { user } = useUser();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        });
+      },
+      { threshold: 0.05, rootMargin: "0px 0px -50px 0px" }
+    );
+
+    const elements = document.querySelectorAll(
+      ".feature-card, .niche-card, .pricing-card, .faq-item, .how-it-works-step, .recovery-card"
+    );
+    elements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
 
   const userEmail = user?.primaryEmailAddress?.emailAddress;
 
@@ -706,6 +726,7 @@ function LandingPage() {
             ].map((s) => (
               <div
                 key={s.step}
+                className="how-it-works-step"
                 style={{
                   background: "white",
                   borderRadius: 20,
