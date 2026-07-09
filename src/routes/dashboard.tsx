@@ -78,7 +78,7 @@ function DashboardPage() {
   return (
     <div
       className="min-h-screen bg-background text-foreground"
-      style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+      style={{ fontFamily: "'DM Sans', system-ui, sans-serif" }}
     >
       {/* Dashboard Header */}
       <header

@@ -103,7 +103,7 @@ function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div className="min-h-screen bg-background text-foreground" style={{ fontFamily: "'DM Sans', system-ui, sans-serif" }}>
       {/* ===== HEADER / NAV ===== */}
       <header
         id="header"

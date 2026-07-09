@@ -29,7 +29,7 @@ function SignInPage() {
         alignItems: "center",
         justifyContent: "center",
         background: "oklch(0.985 0.002 284.1)",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'DM Sans', system-ui, sans-serif",
       }}
     >
       <div style={{ textAlign: "center" }}>
