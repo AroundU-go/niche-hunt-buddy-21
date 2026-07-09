@@ -237,6 +237,12 @@ function DashboardSearch() {
   const quota = userPlan === "pro" ? 1500 : userPlan === "basic" ? 100 : 0;
   const percentUsed = quota > 0 ? Math.min(100, Math.round((extractedLeads / quota) * 100)) : 0;
 
+  useEffect(() => {
+    if (userPlan === "basic" && extractedLeads >= 100) {
+      setPricingModalOpen(true);
+    }
+  }, [userPlan, extractedLeads]);
+
   const origin = typeof window !== "undefined" ? window.location.origin : "https://tryhuntx.site";
   const redirectParam = `&redirect_url=${encodeURIComponent(origin + "/dashboard")}`;
 
@@ -283,8 +289,8 @@ function DashboardSearch() {
   };
 
   const exportToCSV = () => {
-    if (userPlan !== "pro" && !isAdmin) {
-      toast.error("CSV Export is only available on the Pro plan. Please upgrade to Pro.");
+    if (userPlan !== "pro" && userPlan !== "basic" && !isAdmin) {
+      toast.error("CSV Export is only available on paid plans. Please upgrade.");
       setPricingModalOpen(true);
       return;
     }
@@ -354,10 +360,16 @@ function DashboardSearch() {
       const remaining = quota - extractedLeads;
       if (extractedLeads >= quota) {
         toast.error("You have already reached your plan's extraction quota. Please upgrade or wait for the next billing cycle.");
+        if (userPlan === "basic") {
+          setPricingModalOpen(true);
+        }
         return;
       }
       if (finalLimit > remaining) {
         toast.error(`Your request of ${finalLimit} leads exceeds your remaining quota of ${remaining} leads.`);
+        if (userPlan === "basic") {
+          setPricingModalOpen(true);
+        }
         return;
       }
     }
@@ -523,7 +535,7 @@ function DashboardSearch() {
                 >
                   <Download className="h-3.5 w-3.5 text-primary" />
                   Export CSV
-                  {(!isAdmin && userPlan !== "pro") && (
+                  {(!isAdmin && userPlan !== "pro" && userPlan !== "basic") && (
                     <span className="ml-1 rounded bg-primary/10 px-1 py-0.5 text-[9px] font-semibold text-primary uppercase">
                       Pro
                     </span>
@@ -628,7 +640,7 @@ function DashboardSearch() {
                 <PricingItem included label="Save to library" />
                 <PricingItem included label="Phone numbers" />
                 <PricingItem included label="Prioritized lead scoring" />
-                <PricingItem included={false} label="CSV export" />
+                <PricingItem included label="CSV export" />
               </ul>
               <a
                 href={basicCheckoutUrl}

@@ -564,3 +564,26 @@ html {
     padding: 3rem 0;
   }
 }
+
+/* FAQ Styling */
+.faq-item {
+  box-shadow: 0 1px 3px oklch(0 0 0 / 0.02), 0 4px 12px oklch(0 0 0 / 0.01);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.faq-item:hover {
+  border-color: oklch(0.62 0.24 284.1 / 0.2) !important;
+  box-shadow: var(--shadow-card-hover);
+}
+.faq-item details summary::-webkit-details-marker {
+  display: none;
+}
+.faq-item details summary::-moz-list-bullet {
+  display: none;
+}
+.faq-item details summary {
+  list-style: none;
+}
+.faq-item details[open] summary svg {
+  transform: rotate(180deg);
+}
+

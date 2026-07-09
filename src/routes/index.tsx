@@ -1053,7 +1053,7 @@ function LandingPage() {
               <PricingItem included label="Save to library" />
               <PricingItem included label="Phone numbers" />
               <PricingItem included label="Prioritized lead scoring" />
-              <PricingItem included={false} label="CSV export" />
+              <PricingItem included label="CSV export" />
             </ul>
             <a
               href={basicCheckoutUrl}
@@ -1119,7 +1119,122 @@ function LandingPage() {
         </div>
       </section>
 
+      {/* ===== FAQ ===== */}
+      <section
+        id="faq"
+        className="landing-section"
+        style={{
+          maxWidth: 780,
+          margin: "0 auto",
+          padding: "5rem 24px",
+        }}
+      >
+        <div style={{ textAlign: "center", marginBottom: 48 }}>
+          <p
+            style={{
+              fontSize: "0.9rem",
+              fontWeight: 600,
+              color: "oklch(0.52 0.22 284.1)",
+              marginBottom: 12,
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+            }}
+          >
+            FAQ
+          </p>
+          <h2
+            style={{
+              fontSize: "clamp(1.8rem, 3vw, 2.6rem)",
+              fontWeight: 800,
+              lineHeight: 1.15,
+              letterSpacing: "-0.02em",
+              color: "oklch(0.12 0.02 250)",
+            }}
+          >
+            Frequently Asked Questions
+          </h2>
+        </div>
 
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {[
+            {
+              q: "Does huntx guarantee I will get clients?",
+              a: "No. Huntx helps you find businesses with opportunity signals, but closing clients depends on your offer, message, and follow-up.",
+            },
+            {
+              q: "What is included in the Basic plan?",
+              a: "The Basic plan includes 100 lead extractions per month, full access to search history, phone numbers, prioritized lead scoring, and CSV exports.",
+            },
+            {
+              q: "Can I upgrade or cancel my plan?",
+              a: "Yes, you can change your subscription tier or cancel at any time directly through your account profile page.",
+            },
+          ].map((item, idx) => (
+            <div
+              key={idx}
+              style={{
+                background: "white",
+                borderRadius: 16,
+                border: "1px solid oklch(0 0 0 / 0.06)",
+                overflow: "hidden",
+              }}
+              className="faq-item"
+            >
+              <details style={{ width: "100%" }}>
+                <summary
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "20px 24px",
+                    fontWeight: 700,
+                    fontSize: "1.05rem",
+                    color: "oklch(0.18 0.02 250)",
+                    cursor: "pointer",
+                    userSelect: "none",
+                  }}
+                >
+                  <span style={{ paddingRight: 16 }}>{item.q}</span>
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "oklch(0.52 0.22 284.1)",
+                      transition: "transform 0.2s ease",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </span>
+                </summary>
+                <div
+                  style={{
+                    padding: "0 24px 20px",
+                    fontSize: "0.95rem",
+                    lineHeight: 1.6,
+                    color: "oklch(0.45 0.02 250)",
+                    borderTop: "1px solid oklch(0 0 0 / 0.03)",
+                  }}
+                >
+                  {item.a}
+                </div>
+              </details>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* ===== CTA ===== */}
       <section
