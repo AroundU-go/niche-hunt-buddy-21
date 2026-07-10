@@ -615,50 +615,57 @@ function DashboardSearch() {
 
       {/* Pricing Modal for subscription enforcement */}
       <Dialog open={pricingModalOpen} onOpenChange={setPricingModalOpen}>
-        <DialogContent className="max-w-4xl p-6 bg-background border border-border sm:rounded-xl">
-          <DialogHeader className="text-center">
-            <DialogTitle className="text-2xl font-extrabold tracking-tight text-foreground">
-              Choose a Subscription Plan
-            </DialogTitle>
-            <DialogDescription className="text-muted-foreground text-sm mt-1">
-              Free plan quota reached, upgrade for more leads.
-            </DialogDescription>
-          </DialogHeader>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-              gap: 20,
-              marginTop: 20,
-            }}
-          >
+        <DialogContent style={{ maxWidth: 720, width: "95vw", padding: 0, overflow: "hidden", borderRadius: 16, border: "1px solid #e5e7eb", background: "#fff" }}>
+          <div style={{ padding: "28px 28px 0", textAlign: "center" }}>
+            <DialogHeader style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <DialogTitle style={{ fontSize: "1.5rem", fontWeight: 800, color: "#111", letterSpacing: "-0.02em" }}>
+                Choose a Subscription Plan
+              </DialogTitle>
+              <DialogDescription style={{ color: "#888", fontSize: "0.9rem", marginTop: 6 }}>
+                Free plan quota reached, upgrade for more leads.
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, padding: "20px 28px 28px" }}>
             {/* Basic Plan */}
-            <div className="pricing-card" style={{ padding: "24px", minHeight: "auto", background: "#fff" }}>
-              <p style={{ fontSize: "0.85rem", fontWeight: 600, color: "#666", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>
+            <div style={{ background: "#fafafa", border: "1px solid #e5e7eb", borderRadius: 14, padding: "24px", position: "relative" }}>
+              <p style={{ fontSize: "0.8rem", fontWeight: 700, color: "#999", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
                 Basic
               </p>
-              <div style={{ marginBottom: 16 }}>
-                <span style={{ fontSize: "2.5rem", fontWeight: 800, color: "#111" }}>$9</span>
-                <span style={{ fontSize: "1rem", color: "#666" }}>/mo</span>
+              <div style={{ marginBottom: 20 }}>
+                <span style={{ fontSize: "2.4rem", fontWeight: 800, color: "#111" }}>$9</span>
+                <span style={{ fontSize: "0.95rem", color: "#888" }}>/mo</span>
               </div>
-              <ul className="pricing-feature-list" style={{ gap: 8, fontSize: "0.85rem" }}>
-                <PricingItem included label="100 leads per month" />
-                <PricingItem included label="Save to library" />
-                <PricingItem included label="Phone numbers" />
-                <PricingItem included label="Prioritized lead scoring" />
-                <PricingItem included label="CSV export" />
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+                {["100 leads per month", "Save to library", "Phone numbers", "Lead scoring", "CSV export"].map((f) => (
+                  <li key={f} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.85rem", color: "#444" }}>
+                    <span style={{ width: 18, height: 18, borderRadius: "50%", background: "#ede9fe", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <svg viewBox="0 0 12 12" fill="none" style={{ width: 11, height: 11 }}><path d="M2.5 6L5 8.5L9.5 3.5" stroke="#7c3aed" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    </span>
+                    {f}
+                  </li>
+                ))}
               </ul>
               <a
                 href={basicCheckoutUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-outline"
                 style={{
-                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
                   justifyContent: "center",
-                  marginTop: 20,
+                  width: "100%",
+                  marginTop: 22,
                   padding: "10px 16px",
+                  background: "#fff",
+                  color: "#333",
+                  border: "1px solid #d1d5db",
+                  borderRadius: 10,
+                  fontWeight: 600,
+                  fontSize: "0.9rem",
                   textDecoration: "none",
+                  cursor: "pointer",
+                  transition: "border-color 0.15s",
                 }}
               >
                 Get Started
@@ -666,47 +673,52 @@ function DashboardSearch() {
             </div>
 
             {/* Pro Plan */}
-            <div className="pricing-card featured" style={{ padding: "24px", minHeight: "auto", background: "#fff" }}>
-              <div
-                style={{
-                  position: "absolute",
-                  top: 12,
-                  right: 12,
-                  background: "oklch(0.92 0.04 284.1)",
-                  color: "oklch(0.45 0.2 284.1)",
-                  fontSize: "0.7rem",
-                  fontWeight: 700,
-                  padding: "2px 10px",
-                  borderRadius: 999,
-                }}
-              >
+            <div style={{ background: "#fafafa", border: "2px solid #7c3aed", borderRadius: 14, padding: "24px", position: "relative" }}>
+              <span style={{
+                position: "absolute", top: 12, right: 12,
+                background: "#ede9fe", color: "#7c3aed",
+                fontSize: "0.65rem", fontWeight: 700,
+                padding: "3px 10px", borderRadius: 999,
+              }}>
                 Most Popular
-              </div>
-              <p style={{ fontSize: "0.85rem", fontWeight: 600, color: "#666", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>
+              </span>
+              <p style={{ fontSize: "0.8rem", fontWeight: 700, color: "#999", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
                 Pro
               </p>
-              <div style={{ marginBottom: 16 }}>
-                <span style={{ fontSize: "2.5rem", fontWeight: 800, color: "#111" }}>$49</span>
-                <span style={{ fontSize: "1rem", color: "#666" }}>/mo</span>
+              <div style={{ marginBottom: 20 }}>
+                <span style={{ fontSize: "2.4rem", fontWeight: 800, color: "#111" }}>$49</span>
+                <span style={{ fontSize: "0.95rem", color: "#888" }}>/mo</span>
               </div>
-              <ul className="pricing-feature-list" style={{ gap: 8, fontSize: "0.85rem" }}>
-                <PricingItem included label="1,500 leads per month" />
-                <PricingItem included label="Save to library" />
-                <PricingItem included label="Phone numbers" />
-                <PricingItem included label="Prioritized lead scoring" />
-                <PricingItem included label="CSV export" />
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+                {["1,500 leads per month", "Save to library", "Phone numbers", "Lead scoring", "CSV export"].map((f) => (
+                  <li key={f} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.85rem", color: "#444" }}>
+                    <span style={{ width: 18, height: 18, borderRadius: "50%", background: "#ede9fe", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <svg viewBox="0 0 12 12" fill="none" style={{ width: 11, height: 11 }}><path d="M2.5 6L5 8.5L9.5 3.5" stroke="#7c3aed" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    </span>
+                    {f}
+                  </li>
+                ))}
               </ul>
               <a
                 href={proCheckoutUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-primary"
                 style={{
-                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
                   justifyContent: "center",
-                  marginTop: 20,
+                  width: "100%",
+                  marginTop: 22,
                   padding: "10px 16px",
+                  background: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 10,
+                  fontWeight: 600,
+                  fontSize: "0.9rem",
                   textDecoration: "none",
+                  cursor: "pointer",
+                  transition: "opacity 0.15s",
                 }}
               >
                 Get Pro
