@@ -621,7 +621,7 @@ function DashboardSearch() {
               Choose a Subscription Plan
             </DialogTitle>
             <DialogDescription className="text-muted-foreground text-sm mt-1">
-              Every email other than admin must have an active subscription to search leads.
+              Free plan quota reached, upgrade for more leads.
             </DialogDescription>
           </DialogHeader>
           <div
@@ -633,13 +633,13 @@ function DashboardSearch() {
             }}
           >
             {/* Basic Plan */}
-            <div className="pricing-card" style={{ padding: "24px", minHeight: "auto" }}>
-              <p style={{ fontSize: "0.85rem", fontWeight: 600, color: "oklch(0.5 0.02 250)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>
+            <div className="pricing-card" style={{ padding: "24px", minHeight: "auto", background: "#fff" }}>
+              <p style={{ fontSize: "0.85rem", fontWeight: 600, color: "#666", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>
                 Basic
               </p>
               <div style={{ marginBottom: 16 }}>
-                <span style={{ fontSize: "2.5rem", fontWeight: 800, color: "oklch(0.12 0.02 250)" }}>$9</span>
-                <span style={{ fontSize: "1rem", color: "oklch(0.5 0.02 250)" }}>/mo</span>
+                <span style={{ fontSize: "2.5rem", fontWeight: 800, color: "#111" }}>$9</span>
+                <span style={{ fontSize: "1rem", color: "#666" }}>/mo</span>
               </div>
               <ul className="pricing-feature-list" style={{ gap: 8, fontSize: "0.85rem" }}>
                 <PricingItem included label="100 leads per month" />
@@ -666,7 +666,7 @@ function DashboardSearch() {
             </div>
 
             {/* Pro Plan */}
-            <div className="pricing-card featured" style={{ padding: "24px", minHeight: "auto" }}>
+            <div className="pricing-card featured" style={{ padding: "24px", minHeight: "auto", background: "#fff" }}>
               <div
                 style={{
                   position: "absolute",
@@ -682,12 +682,12 @@ function DashboardSearch() {
               >
                 Most Popular
               </div>
-              <p style={{ fontSize: "0.85rem", fontWeight: 600, color: "oklch(0.5 0.02 250)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>
+              <p style={{ fontSize: "0.85rem", fontWeight: 600, color: "#666", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>
                 Pro
               </p>
               <div style={{ marginBottom: 16 }}>
-                <span style={{ fontSize: "2.5rem", fontWeight: 800, color: "oklch(0.12 0.02 250)" }}>$49</span>
-                <span style={{ fontSize: "1rem", color: "oklch(0.5 0.02 250)" }}>/mo</span>
+                <span style={{ fontSize: "2.5rem", fontWeight: 800, color: "#111" }}>$49</span>
+                <span style={{ fontSize: "1rem", color: "#666" }}>/mo</span>
               </div>
               <ul className="pricing-feature-list" style={{ gap: 8, fontSize: "0.85rem" }}>
                 <PricingItem included label="1,500 leads per month" />
