@@ -358,7 +358,7 @@ function DashboardSearch() {
     }
 
     const parsedLimit = parseInt(leadsLimit, 10);
-    const finalLimit = isNaN(parsedLimit) ? 10 : Math.max(1, parsedLimit);
+    const finalLimit = isFreeUser ? 3 : (isNaN(parsedLimit) ? 10 : Math.max(1, parsedLimit));
 
     if (!isAdmin) {
       const remaining = quota - extractedLeads;
