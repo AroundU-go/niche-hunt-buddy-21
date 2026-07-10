@@ -136,9 +136,9 @@ export const searchLeads = createServerFn({ method: "POST" })
 
         userPlan = profile?.plan ?? "free";
         const isAdmin = userEmail === "uddimakesit@gmail.com";
-        hasAccess = isAdmin || userPlan === "pro" || userPlan === "basic";
+        hasAccess = true; // All authenticated users get access; free users have a 3-lead quota
 
-        if (!isAdmin && hasAccess) {
+        if (!isAdmin) {
           // Check quota limits
           const { data: searches } = await supabaseClient
             .from("searches")
@@ -153,7 +153,7 @@ export const searchLeads = createServerFn({ method: "POST" })
             }, 0);
           }
 
-          const planQuota = userPlan === "pro" ? 1500 : userPlan === "basic" ? 100 : 0;
+          const planQuota = userPlan === "pro" ? 1500 : userPlan === "basic" ? 100 : 3;
           if (extractedLeads >= planQuota) {
             throw new Error("quota_exceeded");
           }

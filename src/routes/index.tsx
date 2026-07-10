@@ -1054,12 +1054,43 @@ function LandingPage() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
             gap: 24,
-            maxWidth: 780,
+            maxWidth: 1100,
             margin: "0 auto",
           }}
         >
+          {/* Free Trial Plan */}
+          <div className="pricing-card">
+            <p style={{ fontSize: "0.85rem", fontWeight: 600, color: "oklch(0.5 0.02 250)", textTransform: "uppercase" as const, letterSpacing: "0.05em", marginBottom: 8 }}>
+              Free
+            </p>
+            <div style={{ marginBottom: 24 }}>
+              <span style={{ fontSize: "3rem", fontWeight: 800, color: "oklch(0.12 0.02 250)" }}>$0</span>
+              <span style={{ fontSize: "1rem", color: "oklch(0.5 0.02 250)" }}>/forever</span>
+            </div>
+            <ul className="pricing-feature-list">
+              <PricingItem included label="3 leads per month" />
+              <PricingItem included label="Basic lead scoring" />
+              <PricingItem included label="Phone numbers" />
+              <PricingItem included={false} label="CSV export" />
+              <PricingItem included={false} label="Save to library" />
+            </ul>
+            <a
+              href="https://accounts.tryhuntx.site/sign-up"
+              className="btn-outline"
+              style={{
+                width: "100%",
+                justifyContent: "center",
+                marginTop: 28,
+                padding: "12px 20px",
+                textDecoration: "none",
+              }}
+            >
+              Try Free
+            </a>
+          </div>
+
           {/* Starter Plan */}
           <div className="pricing-card">
             <p style={{ fontSize: "0.85rem", fontWeight: 600, color: "oklch(0.5 0.02 250)", textTransform: "uppercase" as const, letterSpacing: "0.05em", marginBottom: 8 }}>

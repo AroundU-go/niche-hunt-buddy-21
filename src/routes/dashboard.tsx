@@ -73,7 +73,7 @@ function DashboardPage() {
   const userPlan = planQuery.data?.plan ?? null;
   const userEmail = planQuery.data?.email ?? "";
   const isAdmin = userEmail === "uddimakesit@gmail.com";
-  const hasAccess = isAdmin || userPlan === "pro" || userPlan === "basic";
+  const hasAccess = true; // All authenticated users get access; free users have limited quota
 
   return (
     <div
@@ -232,16 +232,20 @@ function DashboardSearch() {
   const userEmail = planQuery.data?.email ?? "";
   const extractedLeads = planQuery.data?.extractedLeads ?? 0;
   const isAdmin = userEmail === "uddimakesit@gmail.com";
-  const hasAccess = isAdmin || userPlan === "pro" || userPlan === "basic";
+  const isFreeUser = !isAdmin && userPlan !== "pro" && userPlan !== "basic";
+  const hasAccess = true; // All authenticated users get access; free users have limited quota
 
-  const quota = userPlan === "pro" ? 1500 : userPlan === "basic" ? 100 : 0;
+  const quota = userPlan === "pro" ? 1500 : userPlan === "basic" ? 100 : 3;
   const percentUsed = quota > 0 ? Math.min(100, Math.round((extractedLeads / quota) * 100)) : 0;
 
   useEffect(() => {
     if (userPlan === "basic" && extractedLeads >= 100) {
       setPricingModalOpen(true);
     }
-  }, [userPlan, extractedLeads]);
+    if (isFreeUser && extractedLeads >= 3) {
+      setPricingModalOpen(true);
+    }
+  }, [userPlan, extractedLeads, isFreeUser]);
 
   const origin = typeof window !== "undefined" ? window.location.origin : "https://tryhuntx.site";
   const redirectParam = `&redirect_url=${encodeURIComponent(origin + "/dashboard")}`;
@@ -348,7 +352,7 @@ function DashboardSearch() {
     e.preventDefault();
     if (!city.trim() || !niche.trim()) return;
 
-    if (!hasAccess) {
+    if (isFreeUser && extractedLeads >= 3) {
       setPricingModalOpen(true);
       return;
     }
@@ -392,14 +396,14 @@ function DashboardSearch() {
       {/* Main column */}
       <div>
         {/* Quota Tracker */}
-        {hasAccess && !isAdmin && (
+        {!isAdmin && (
           <Card className="mb-6 border-border/60 bg-card p-5" style={{ boxShadow: "var(--shadow-card)" }}>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-2">
                   Extraction Quota
                   <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold text-primary uppercase">
-                    {userPlan === "pro" ? "PRO" : "BASIC"}
+                    {userPlan === "pro" ? "PRO" : userPlan === "basic" ? "BASIC" : "FREE"}
                   </span>
                 </h3>
                 <p className="text-2xl font-extrabold text-foreground">
@@ -472,11 +476,11 @@ function DashboardSearch() {
                   type="number"
                   min={1}
                   max={isAdmin ? 10000 : Math.max(1, quota - extractedLeads)}
-                  value={leadsLimit}
-                  onChange={(e) => setLeadsLimit(e.target.value)}
+                  value={isFreeUser ? "3" : leadsLimit}
+                  onChange={(e) => { if (!isFreeUser) setLeadsLimit(e.target.value); }}
                   placeholder="10"
                   className="pl-9"
-                  disabled={mutation.isPending}
+                  disabled={mutation.isPending || isFreeUser}
                 />
               </div>
             </div>
@@ -528,16 +532,18 @@ function DashboardSearch() {
               </h3>
               <div className="flex items-center gap-3">
                 <Button
-                  onClick={exportToCSV}
+                  onClick={isFreeUser ? () => { toast.error("CSV Export is only available on paid plans. Please upgrade."); setPricingModalOpen(true); } : exportToCSV}
                   variant="outline"
                   size="sm"
-                  className="h-8 gap-1.5 text-xs font-medium border-primary/20 hover:border-primary/40 hover:bg-primary/5 text-foreground"
+                  disabled={isFreeUser}
+                  className={`h-8 gap-1.5 text-xs font-medium border-primary/20 hover:border-primary/40 hover:bg-primary/5 text-foreground ${isFreeUser ? "opacity-50 cursor-not-allowed" : ""}`}
+                  title={isFreeUser ? "Upgrade to a paid plan to export CSV" : "Export leads to CSV"}
                 >
                   <Download className="h-3.5 w-3.5 text-primary" />
                   Export CSV
-                  {(!isAdmin && userPlan !== "pro" && userPlan !== "basic") && (
+                  {isFreeUser && (
                     <span className="ml-1 rounded bg-primary/10 px-1 py-0.5 text-[9px] font-semibold text-primary uppercase">
-                      Pro
+                      Paid
                     </span>
                   )}
                 </Button>
