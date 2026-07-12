@@ -439,7 +439,7 @@ function DashboardSearch() {
           </div>
           <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-[1fr_1fr_120px_auto]">
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">City</label>
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">City/postal code</label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
