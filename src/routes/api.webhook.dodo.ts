@@ -1,6 +1,6 @@
 import { createAPIFileRoute } from "@tanstack/react-start/api";
 import { Webhook } from "standardwebhooks";
-import { supabase } from "../lib/supabase";
+import { createClient } from "@supabase/supabase-js";
 
 export const APIRoute = createAPIFileRoute("/api/webhook/dodo")({
   POST: async ({ request }) => {
@@ -73,7 +73,17 @@ export const APIRoute = createAPIFileRoute("/api/webhook/dodo")({
       return new Response("Event ignored", { status: 200 });
     }
 
-    const { error } = await supabase
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !serviceRoleKey) {
+      console.error("SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is not configured");
+      return new Response("Server misconfigured", { status: 500 });
+    }
+
+    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
+
+    const { error } = await supabaseAdmin
       .from("profiles")
       .update({
         plan,

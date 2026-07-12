@@ -268,7 +268,7 @@ function DashboardSearch() {
       queryClient.invalidateQueries({ queryKey: ["searchHistory"] });
       queryClient.invalidateQueries({ queryKey: ["userPlan"] });
       if (data.leads.length === 0) {
-        toast.info("No leads found. Try a broader city or different niche.");
+        toast.info("No leads found. Try searching a wider area or entering a postal code.");
       } else {
         toast.success(`Found ${data.leads.length} leads without websites`);
       }
@@ -557,7 +557,7 @@ function DashboardSearch() {
             </div>
           </div>
         ) : !mutation.isPending ? (
-          <EmptyState />
+          <EmptyState hasSearched={meta !== null} />
         ) : (
           <LoadingSkeleton />
         )}
@@ -916,7 +916,18 @@ function LeadCard({ lead }: { lead: Lead }) {
   );
 }
 
-function EmptyState() {
+function EmptyState({ hasSearched }: { hasSearched?: boolean }) {
+  if (hasSearched) {
+    return (
+      <div className="rounded-lg border border-dashed border-border/60 bg-card/40 p-12 text-center">
+        <MapPin className="mx-auto h-10 w-10 text-muted-foreground" />
+        <h3 className="mt-4 text-base font-semibold">No leads found</h3>
+        <p className="mt-1 text-sm text-muted-foreground max-w-sm mx-auto">
+          We couldn't find any businesses without websites in this location. Try searching a wider area or entering a postal code.
+        </p>
+      </div>
+    );
+  }
   return (
     <div className="rounded-lg border border-dashed border-border/60 bg-card/40 p-12 text-center">
       <Crosshair className="mx-auto h-10 w-10 text-muted-foreground" />

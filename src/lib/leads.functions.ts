@@ -84,6 +84,28 @@ export const syncUserProfile = createServerFn({ method: "POST" })
     }
   });
 
+function isPostalCode(str: string): boolean {
+  const trimmed = str.trim();
+  // US ZIP: 5 digits, optionally followed by - and 4 digits
+  const usZip = /^\d{5}(-\d{4})?$/;
+  // UK Postcode
+  const ukPost = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i;
+  // Canadian Postal Code
+  const caPost = /^[A-Z]\d[A-Z]\s*\d[A-Z]\d$/i;
+  // Indian PIN / general digit-only postal codes (3 to 10 digits)
+  const numericPost = /^\d{3,10}$/;
+  // General alphanumeric postal code (e.g. NL 4 digits + 2 letters)
+  const generalAlphanumeric = /^\d{4}\s*[A-Z]{2}$/i;
+
+  return (
+    usZip.test(trimmed) ||
+    ukPost.test(trimmed) ||
+    caPost.test(trimmed) ||
+    numericPost.test(trimmed) ||
+    generalAlphanumeric.test(trimmed)
+  );
+}
+
 export const searchLeads = createServerFn({ method: "POST" })
   .inputValidator((data: { city: string; niche: string; limit?: number }) => {
     if (!data || typeof data.city !== "string" || typeof data.niche !== "string") {
@@ -180,11 +202,13 @@ export const searchLeads = createServerFn({ method: "POST" })
       limit = Math.min(3, limit);
     }
 
+    const isPostal = isPostalCode(data.city);
     const input = {
       enableCompetitorAnalysis: false,
       includeWebResults: false,
       language: "en",
       locationQuery: data.city,
+      ...(isPostal ? { postalCode: data.city.trim() } : {}),
       maxCompetitorsToAnalyze: 0,
       maxCrawledPlacesPerSearch: limit,
       maxReviews: 3,
