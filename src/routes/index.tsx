@@ -1046,7 +1046,7 @@ function LandingPage() {
                 margin: 0,
               }}
             >
-              Huntly users pay $9/month. A single website is worth $200 or more. Close one and the plan is paid for 20 times over.
+              HuntX users pay $9/month. A single website is worth $200 or more. Close one and the plan is paid for 20 times over.
             </p>
           </div>
         </div>
