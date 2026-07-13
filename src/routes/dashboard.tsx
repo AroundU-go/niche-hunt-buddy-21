@@ -251,8 +251,8 @@ function DashboardSearch() {
   const redirectParam = `&redirect_url=${encodeURIComponent(origin + "/dashboard")}`;
 
   const basicCheckoutUrl = userEmail
-    ? `https://checkout.dodopayments.com/buy/pdt_0NiVJmJzctfUNFC2qgT1k?quantity=1&email=${encodeURIComponent(userEmail)}&disableEmail=true${redirectParam}`
-    : `https://checkout.dodopayments.com/buy/pdt_0NiVJmJzctfUNFC2qgT1k?quantity=1${redirectParam}`;
+    ? `https://test.checkout.dodopayments.com/buy/pdt_0Nj77SLfEBSvnbIqC8ZEP?quantity=1&email=${encodeURIComponent(userEmail)}&disableEmail=true&redirect_url=https://www.tryhuntx.site%2Fdashboard`
+    : `https://test.checkout.dodopayments.com/buy/pdt_0Nj77SLfEBSvnbIqC8ZEP?quantity=1&redirect_url=https://www.tryhuntx.site%2Fdashboard`;
 
   const proCheckoutUrl = userEmail
     ? `https://checkout.dodopayments.com/buy/pdt_0NiVK2h79kd3euwcFhI9z?quantity=1&email=${encodeURIComponent(userEmail)}&disableEmail=true${redirectParam}`
