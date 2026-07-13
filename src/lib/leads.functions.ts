@@ -61,6 +61,14 @@ export const syncUserProfile = createServerFn({ method: "POST" })
       const email = user.emailAddresses?.[0]?.emailAddress ?? "";
 
       const supabaseClient = await getSupabaseClient(getToken);
+      const { data: profile } = await supabaseClient
+        .from("profiles")
+        .select("plan")
+        .eq("id", userId)
+        .single();
+
+      const plan = profile?.plan ?? "free";
+
       const { error } = await supabaseClient.from("profiles").upsert(
         {
           id: userId,
@@ -68,6 +76,7 @@ export const syncUserProfile = createServerFn({ method: "POST" })
           first_name: user.firstName ?? null,
           last_name: user.lastName ?? null,
           last_login: new Date().toISOString(),
+          plan,
         },
         { onConflict: "id" }
       );
@@ -137,6 +146,15 @@ export const searchLeads = createServerFn({ method: "POST" })
         supabaseClient = await getSupabaseClient(getToken);
         const user = await clerkClient().users.getUser(userId);
         userEmail = user.emailAddresses?.[0]?.emailAddress ?? "";
+        // Fetch plan status to determine search limits dynamically and preserve/set plan in database
+        const { data: profile } = await supabaseClient
+          .from("profiles")
+          .select("plan")
+          .eq("id", userId)
+          .single();
+
+        userPlan = profile?.plan ?? "free";
+
         // Upsert profile in Supabase
         await supabaseClient.from("profiles").upsert(
           {
@@ -145,18 +163,10 @@ export const searchLeads = createServerFn({ method: "POST" })
             first_name: user.firstName ?? null,
             last_name: user.lastName ?? null,
             last_login: new Date().toISOString(),
+            plan: userPlan,
           },
           { onConflict: "id" }
         );
-
-        // Fetch plan status to determine search limits dynamically
-        const { data: profile } = await supabaseClient
-          .from("profiles")
-          .select("plan")
-          .eq("id", userId)
-          .single();
-
-        userPlan = profile?.plan ?? "free";
         const isAdmin = userEmail === "uddimakesit@gmail.com";
         hasAccess = true; // All authenticated users get access; free users have a 3-lead quota
 
