@@ -49,11 +49,16 @@ export const Route = createFileRoute("/dashboard")({
 function DashboardPage() {
   const runSyncProfile = useServerFn(syncUserProfile);
   const runGetUserPlan = useServerFn(getUserPlan);
+  const queryClient = useQueryClient();
 
   // Sync user profile to Supabase on dashboard load
   useEffect(() => {
     runSyncProfile()
       .then((res) => {
+        // Force invalidate plan and history query cache to pick up upgrades immediately on mount/redirect
+        queryClient.invalidateQueries({ queryKey: ["userPlan"] });
+        queryClient.invalidateQueries({ queryKey: ["searchHistory"] });
+
         if (res && !res.synced && "error" in res) {
           toast.error(`Database Profile Sync failed: ${res.error}`);
         } else if (res && res.synced) {
@@ -247,12 +252,24 @@ function DashboardSearch() {
     }
   }, [userPlan, extractedLeads, isFreeUser]);
 
+  // Adjust leads limit based on plan/quota changes
+  useEffect(() => {
+    if (isFreeUser) {
+      setLeadsLimit("3");
+    } else {
+      const remaining = quota - extractedLeads;
+      // Default to 10 or remaining quota if remaining is less than 10
+      const defaultLimit = Math.min(10, Math.max(1, remaining));
+      setLeadsLimit(String(defaultLimit));
+    }
+  }, [userPlan, extractedLeads, isFreeUser, quota]);
+
   const origin = typeof window !== "undefined" ? window.location.origin : "https://tryhuntx.site";
   const redirectParam = `&redirect_url=${encodeURIComponent(origin + "/dashboard")}`;
 
   const basicCheckoutUrl = userEmail
-    ? `https://test.checkout.dodopayments.com/buy/pdt_0Nj77SLfEBSvnbIqC8ZEP?quantity=1&email=${encodeURIComponent(userEmail)}&disableEmail=true&redirect_url=https://www.tryhuntx.site%2Fdashboard`
-    : `https://test.checkout.dodopayments.com/buy/pdt_0Nj77SLfEBSvnbIqC8ZEP?quantity=1&redirect_url=https://www.tryhuntx.site%2Fdashboard`;
+    ? `https://checkout.dodopayments.com/buy/pdt_0NiVJmJzctfUNFC2qgT1k?quantity=1&email=${encodeURIComponent(userEmail)}&disableEmail=true&redirect_url=https://www.tryhuntx.site%2Fdashboard`
+    : `https://checkout.dodopayments.com/buy/pdt_0NiVJmJzctfUNFC2qgT1k?quantity=1&redirect_url=https://www.tryhuntx.site%2Fdashboard`;
 
   const proCheckoutUrl = userEmail
     ? `https://checkout.dodopayments.com/buy/pdt_0NiVK2h79kd3euwcFhI9z?quantity=1&email=${encodeURIComponent(userEmail)}&disableEmail=true${redirectParam}`
@@ -476,8 +493,8 @@ function DashboardSearch() {
                   type="number"
                   min={1}
                   max={isAdmin ? 10000 : Math.max(1, quota - extractedLeads)}
-                  value={isFreeUser ? "3" : leadsLimit}
-                  onChange={(e) => { if (!isFreeUser) setLeadsLimit(e.target.value); }}
+                  value={leadsLimit}
+                  onChange={(e) => setLeadsLimit(e.target.value)}
                   placeholder="10"
                   className="pl-9"
                   disabled={mutation.isPending || isFreeUser}

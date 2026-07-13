@@ -55,7 +55,7 @@ export const APIRoute = createAPIFileRoute("/api/webhook/dodo")({
       eventType === "subscription.renewed" ||
       eventType === "payment.succeeded"
     ) {
-      if (productId === "pdt_0NiVJmJzctfUNFC2qgT1k" || productId === "pdt_0Nj77SLfEBSvnbIqC8ZEP") {
+      if (productId === "pdt_0NiVJmJzctfUNFC2qgT1k") {
         plan = "basic";
         status = "active";
       } else if (productId === "pdt_0NiVK2h79kd3euwcFhI9z") {
